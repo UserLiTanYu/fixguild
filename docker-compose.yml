@@ -1,0 +1,67 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: lty-workorder-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123456}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-lty_workorder}
+      MYSQL_USER: ${MYSQL_USER:-lty}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-lty123456}
+      TZ: Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./docs/sql/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./docker/mysql/init/02-seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-root123456}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7
+    container_name: lty-workorder-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: [ "redis-server", "--appendonly", "yes" ]
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    container_name: lty-workorder-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+    command: server /data --console-address ":9001"
+
+  # M4 再加 RocketMQ / XXL-Job；先保持本地启动轻量
+  # rocketmq-namesrv:
+  #   image: apache/rocketmq:5.3.1
+  #   ...
+  # xxl-job-admin:
+  #   image: xuxueli/xxl-job-admin:2.4.1
+  #   ...
+
+volumes:
+  mysql-data:
+  redis-data:
+  minio-data:

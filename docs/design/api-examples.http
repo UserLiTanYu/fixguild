@@ -1,0 +1,333 @@
+### ============================================================
+### 多租户维保工单系统 · 核心接口示例
+### 适用于 IntelliJ HTTP Client / VS Code REST Client
+### 说明：M1 只有健康检查和租户 CRUD 可直接调用；
+###       登录、工单、技师等接口是 M2/M3 的设计示例。
+### ============================================================
+
+@baseUrl = http://localhost:8090
+@platformToken = 替换为平台登录返回的 token
+@tenantToken = 替换为租户登录返回的 token
+@techToken = 替换为技师登录返回的 token
+@tenantCode = T0001
+@requestId = 01JABCDEF00000000000000001
+
+### 健康检查（白名单）
+GET {{baseUrl}}/api/health
+
+### 平台登录
+POST {{baseUrl}}/account/api/platform/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+### 租户登录
+POST {{baseUrl}}/account/api/tenant/login
+Content-Type: application/json
+
+{
+  "tenantCode": "{{tenantCode}}",
+  "username": "tenant_admin",
+  "password": "admin123"
+}
+
+### 技师登录（短信验证码，开发环境固定 123456）
+POST {{baseUrl}}/account/api/technician/login
+Content-Type: application/json
+
+{
+  "tenantCode": "{{tenantCode}}",
+  "mobile": "13800000000",
+  "smsCode": "123456"
+}
+
+### 当前用户信息
+POST {{baseUrl}}/account/api/tenant/user/info
+satoken: {{tenantToken}}
+client-code: tenant
+
+### 当前用户权限/菜单
+POST {{baseUrl}}/account/api/tenant/user/auth
+satoken: {{tenantToken}}
+client-code: tenant
+
+### 平台端-租户分页
+POST {{baseUrl}}/platform/api/tenant/page
+satoken: {{platformToken}}
+client-code: platform
+Content-Type: application/json
+
+{
+  "pageNum": 1,
+  "pageSize": 20,
+  "tenantName": "维保"
+}
+
+### 平台端-新增租户（M1 可直接调用）
+POST {{baseUrl}}/platform/api/tenant/create
+Content-Type: application/json
+
+{
+  "tenantCode": "T1001",
+  "tenantName": "测试维保公司",
+  "contactName": "李四",
+  "contactMobile": "13800000000",
+  "maxUserCount": 20,
+  "remark": "M1 演示"
+}
+
+### 平台端-租户详情（M1 可直接调用，uid 换成新增返回的值）
+POST {{baseUrl}}/platform/api/tenant/detail
+Content-Type: application/json
+
+{
+  "uid": "替换为新增租户返回的 uid"
+}
+
+### 平台端-编辑租户（M1 可直接调用）
+POST {{baseUrl}}/platform/api/tenant/update
+Content-Type: application/json
+
+{
+  "uid": "替换为新增租户返回的 uid",
+  "tenantName": "测试维保公司-改名",
+  "contactName": "王五",
+  "maxUserCount": 30
+}
+
+### 平台端-启停租户（M1 可直接调用）
+POST {{baseUrl}}/platform/api/tenant/status
+Content-Type: application/json
+
+{
+  "uid": "替换为新增租户返回的 uid",
+  "status": 0
+}
+
+### 租户端-工单分页
+POST {{baseUrl}}/tenant/api/work-order/page
+satoken: {{tenantToken}}
+client-code: tenant
+Content-Type: application/json
+
+{
+  "pageNum": 1,
+  "pageSize": 20,
+  "status": "PENDING",
+  "priority": 3,
+  "keyword": "空调"
+}
+
+### 租户端-创建工单
+POST {{baseUrl}}/tenant/api/work-order/create
+satoken: {{tenantToken}}
+client-code: tenant
+X-Request-Id: {{requestId}}
+Content-Type: application/json
+
+{
+  "customerUid": "C0000000000000000000000000000001",
+  "equipmentUid": "E0000000000000000000000000000001",
+  "title": "空调不制冷",
+  "description": "3 楼会议室空调开机后不制冷，出风口有异响",
+  "priority": 3,
+  "expectTime": "2026-11-17 10:00:00",
+  "attachments": [
+    {
+      "fileName": "1.jpg",
+      "fileKey": "workorder/2026/11/16/demo-1.jpg",
+      "fileType": 1
+    }
+  ]
+}
+
+### 租户端-派单
+POST {{baseUrl}}/tenant/api/work-order/assign
+satoken: {{tenantToken}}
+client-code: tenant
+X-Request-Id: {{requestId}}
+Content-Type: application/json
+
+{
+  "orderUid": "WO000000000000000000000000000001",
+  "technicianUid": "T0000000000000000000000000000001",
+  "remark": "请尽快上门",
+  "requestId": "{{requestId}}"
+}
+
+### 租户端-取消工单
+POST {{baseUrl}}/tenant/api/work-order/cancel
+satoken: {{tenantToken}}
+client-code: tenant
+X-Request-Id: {{requestId}}
+Content-Type: application/json
+
+{
+  "orderUid": "WO000000000000000000000000000001",
+  "cancelReason": "客户临时取消",
+  "requestId": "{{requestId}}"
+}
+
+### 租户端-确认完工
+POST {{baseUrl}}/tenant/api/work-order/confirm
+satoken: {{tenantToken}}
+client-code: tenant
+X-Request-Id: {{requestId}}
+Content-Type: application/json
+
+{
+  "orderUid": "WO000000000000000000000000000001",
+  "remark": "验收通过",
+  "requestId": "{{requestId}}"
+}
+
+### 租户端-工单日志
+POST {{baseUrl}}/tenant/api/work-order/log/page
+satoken: {{tenantToken}}
+client-code: tenant
+Content-Type: application/json
+
+{
+  "pageNum": 1,
+  "pageSize": 20,
+  "orderUid": "WO000000000000000000000000000001"
+}
+
+### 技师端-我的工单
+POST {{baseUrl}}/technician/api/work-order/page
+satoken: {{techToken}}
+client-code: technician
+Content-Type: application/json
+
+{
+  "pageNum": 1,
+  "pageSize": 20,
+  "status": "ASSIGNED"
+}
+
+### 技师端-接单
+POST {{baseUrl}}/technician/api/work-order/accept
+satoken: {{techToken}}
+client-code: technician
+X-Request-Id: {{requestId}}
+Content-Type: application/json
+
+{
+  "orderUid": "WO000000000000000000000000000001",
+  "requestId": "{{requestId}}"
+}
+
+### 技师端-拒单
+POST {{baseUrl}}/technician/api/work-order/reject
+satoken: {{techToken}}
+client-code: technician
+X-Request-Id: {{requestId}}
+Content-Type: application/json
+
+{
+  "orderUid": "WO000000000000000000000000000001",
+  "reason": "不在服务区域",
+  "requestId": "{{requestId}}"
+}
+
+### 技师端-开始处理
+POST {{baseUrl}}/technician/api/work-order/start
+satoken: {{techToken}}
+client-code: technician
+X-Request-Id: {{requestId}}
+Content-Type: application/json
+
+{
+  "orderUid": "WO000000000000000000000000000001",
+  "requestId": "{{requestId}}"
+}
+
+### 技师端-完工
+POST {{baseUrl}}/technician/api/work-order/complete
+satoken: {{techToken}}
+client-code: technician
+X-Request-Id: {{requestId}}
+Content-Type: application/json
+
+{
+  "orderUid": "WO000000000000000000000000000001",
+  "finishRemark": "更换电容，已恢复",
+  "attachments": [
+    {
+      "fileName": "after.jpg",
+      "fileKey": "workorder/2026/11/16/demo-after.jpg",
+      "fileType": 1
+    }
+  ],
+  "requestId": "{{requestId}}"
+}
+
+### 技师端-今日概览
+POST {{baseUrl}}/technician/api/work-order/today
+satoken: {{techToken}}
+client-code: technician
+
+### 文件预签名
+POST {{baseUrl}}/api/file/presign
+satoken: {{tenantToken}}
+client-code: tenant
+Content-Type: application/json
+
+{
+  "fileName": "1.jpg",
+  "contentType": "image/jpeg",
+  "bizType": "WORK_ORDER"
+}
+
+### 文件确认
+POST {{baseUrl}}/api/file/confirm
+satoken: {{tenantToken}}
+client-code: tenant
+Content-Type: application/json
+
+{
+  "fileKey": "workorder/2026/11/16/demo-1.jpg",
+  "fileName": "1.jpg",
+  "fileType": 1,
+  "bizType": "WORK_ORDER"
+}
+
+### 创建导出任务
+POST {{baseUrl}}/tenant/api/work-order/export
+satoken: {{tenantToken}}
+client-code: tenant
+Content-Type: application/json
+
+{
+  "pageNum": 1,
+  "pageSize": 20,
+  "status": "PENDING"
+}
+
+### 导出任务状态
+POST {{baseUrl}}/api/export/task/status
+satoken: {{tenantToken}}
+client-code: tenant
+Content-Type: application/json
+
+{
+  "taskUid": "EX000000000000000000000000000001"
+}
+
+### 导出任务下载
+POST {{baseUrl}}/api/export/task/download
+satoken: {{tenantToken}}
+client-code: tenant
+Content-Type: application/json
+
+{
+  "taskUid": "EX000000000000000000000000000001"
+}
+
+### 字典数据
+POST {{baseUrl}}/api/dict/data/work_order_status
+satoken: {{tenantToken}}
+client-code: tenant

@@ -1,0 +1,76 @@
+server:
+  port: 8090
+  servlet:
+    context-path: /
+  tomcat:
+    uri-encoding: UTF-8
+
+spring:
+  application:
+    name: lty-workorder
+  profiles:
+    active: local
+  threads:
+    virtual:
+      enabled: true
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 50MB
+
+mybatis-flex:
+  tenant:
+    enabled: true
+    column: tenant_id
+    ignore-tables:
+      - sys_tenant
+      - sys_menu
+      - sys_dict_type
+      - sys_dict_data
+      - sys_login_log
+      - sys_operate_log
+      - mq_consume_log
+      - msg_fail
+    insert-auto-fill: true
+    update-auto-fill: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+  group-configs:
+    - group: account
+      display-name: 账号权限
+      paths-to-match: /**
+      packages-to-scan: com.lty.workorder.account.controller
+    - group: web
+      display-name: 公共接口
+      paths-to-match: /**
+      packages-to-scan: com.lty.workorder.web.controller
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+sa-token:
+  token-name: satoken
+  # 30 天有效
+  timeout: 2592000
+  # 5 天无活动失效
+  active-timeout: 432000
+  # 允许多端同时在线，按 device=client-code 隔离
+  is-concurrent: true
+  # 每次登录生成新 token
+  is-share: false
+  token-style: uuid
+  is-read-header: true
+  is-read-cookie: false
+  is-log: false
+
+logging:
+  config: classpath:logback-spring.xml

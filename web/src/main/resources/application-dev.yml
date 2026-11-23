@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: "${DB_URL:jdbc:mysql://localhost:3306/lty_workorder?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true}"
+    username: ${DB_USERNAME:lty}
+    password: ${DB_PASSWORD:lty123456}
+  sql:
+    init:
+      mode: never

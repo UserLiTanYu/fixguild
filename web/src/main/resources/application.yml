@@ -7,7 +7,7 @@ server:
 
 spring:
   application:
-    name: lty-workorder
+    name: fixguild
   profiles:
     active: local
   threads:
@@ -45,11 +45,11 @@ springdoc:
     - group: account
       display-name: 账号权限
       paths-to-match: /**
-      packages-to-scan: com.lty.workorder.account.controller
+      packages-to-scan: com.fixguild.account.controller
     - group: web
       display-name: 公共接口
       paths-to-match: /**
-      packages-to-scan: com.lty.workorder.web.controller
+      packages-to-scan: com.fixguild.web.controller
 
 management:
   endpoints:

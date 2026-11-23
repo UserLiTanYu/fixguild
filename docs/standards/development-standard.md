@@ -1,8 +1,8 @@
-# lty-workorder 开发规范
+# Fixguild 开发规范
 
 | 项 | 内容 |
 |---|---|
-| 项目 | `lty-workorder`（多租户维保工单系统） |
+| 项目 | `fixguild`（匠盟 · 多租户维保工单 SaaS） |
 | 版本 | v0.3 |
 | 日期 | 2026-11-19 |
 | 适用范围 | 所有模块（`common`、`account`、`core`、`web`）及后续新增模块 |
@@ -139,10 +139,10 @@ web ──> account ──> common
 
 ```java
 @SpringBootApplication
-@ComponentScan(basePackages = "com.lty.workorder")
+@ComponentScan(basePackages = "com.fixguild")
 @MapperScan(basePackages = {
-        "com.lty.workorder.account.mapper",
-        "com.lty.workorder.core.mapper"
+        "com.fixguild.account.mapper",
+        "com.fixguild.core.mapper"
 })
 public class WebApplication {
     public static void main(String[] args) {
@@ -172,7 +172,7 @@ public class WebApplication {
 业务模块统一使用以下结构：
 
 ```text
-com.lty.workorder.{module}
+com.fixguild.{module}
 ├── controller        # 接口层
 ├── service           # 业务接口
 │   └── impl          # 业务实现
@@ -188,7 +188,7 @@ com.lty.workorder.{module}
 `common` 模块按能力划分：
 
 ```text
-com.lty.workorder.common
+com.fixguild.common
 ├── config            # MyBatis-Flex、OpenAPI 等全局配置
 ├── domain            # BaseEntity、TenantEntity、CommonResponse、PageParam、PageResult
 ├── enums             # ErrorCode 等
@@ -1307,9 +1307,9 @@ WHERE id = #{id}
 
 ### 12.1 消息（RocketMQ，🟡 M4）
 
-- Topic：`lty_workorder_topic${mq.env-suffix}`。
+- Topic：`fixguild_topic${mq.env-suffix}`。
 - Tag：`CREATED`、`ASSIGNED`、`ACCEPTED`、`REJECTED`、`STARTED`、`COMPLETED`、`CONFIRMED`、`CANCELED`、`TIMEOUT`。
-- 消费组：`lty-workorder-notify-consumer`、`lty-workorder-stat-consumer`、`lty-workorder-audit-consumer`。
+- 消费组：`fixguild-notify-consumer`、`fixguild-stat-consumer`、`fixguild-audit-consumer`。
 - 消息信封**必须**包含：
 
 ```json
@@ -2128,7 +2128,7 @@ springdoc:
     - group: core
       display-name: 工单核心
       paths-to-match: /**
-      packages-to-scan: com.lty.workorder.core.controller
+      packages-to-scan: com.fixguild.core.controller
 ```
 
 ### A.9 测试
@@ -2193,10 +2193,10 @@ springdoc:
 
 ```powershell
 # H2（默认 local）
-java -jar web/target/lty-workorder.jar --spring.profiles.active=local
+java -jar web/target/fixguild.jar --spring.profiles.active=local
 
 # MySQL（dev）
-java -jar web/target/lty-workorder.jar --spring.profiles.active=dev
+java -jar web/target/fixguild.jar --spring.profiles.active=dev
 
 # IDE 直接运行 WebApplication，程序参数：
 --spring.profiles.active=local
@@ -2226,7 +2226,7 @@ docker compose down -v   # 连同数据卷一起删除，重置数据库
 | 健康检查 | `http://localhost:8090/api/health` |
 | Swagger | `http://localhost:8090/doc.html` |
 | H2 控制台 | `http://localhost:8090/h2-console` |
-| MySQL | `localhost:3306`，库 `lty_workorder` |
+| MySQL | `localhost:3306`，库 `fixguild` |
 | Redis | `localhost:6379` |
 | MinIO API | `http://localhost:9000` |
 | MinIO 控制台 | `http://localhost:9001` |
@@ -2249,12 +2249,12 @@ docker compose down -v   # 连同数据卷一起删除，重置数据库
 | 文件 | 用途 |
 |---|---|
 | `pom.xml` | 版本基线、依赖管理、编译插件 |
-| `common/src/main/java/com/lty/workorder/common/domain/CommonResponse.java` | 统一响应 |
-| `common/src/main/java/com/lty/workorder/common/exception/GlobalExceptionHandler.java` | 全局异常 |
-| `common/src/main/java/com/lty/workorder/common/tenant/TenantContext.java` | 租户上下文 |
-| `common/src/main/java/com/lty/workorder/common/filter/TraceIdFilter.java` | traceId |
-| `account/src/main/java/com/lty/workorder/account/controller/SysTenantController.java` | 分层参考 |
-| `account/src/main/java/com/lty/workorder/account/service/impl/SysTenantServiceImpl.java` | Service 参考 |
+| `common/src/main/java/com/fixguild/common/domain/CommonResponse.java` | 统一响应 |
+| `common/src/main/java/com/fixguild/common/exception/GlobalExceptionHandler.java` | 全局异常 |
+| `common/src/main/java/com/fixguild/common/tenant/TenantContext.java` | 租户上下文 |
+| `common/src/main/java/com/fixguild/common/filter/TraceIdFilter.java` | traceId |
+| `account/src/main/java/com/fixguild/account/controller/SysTenantController.java` | 分层参考 |
+| `account/src/main/java/com/fixguild/account/service/impl/SysTenantServiceImpl.java` | Service 参考 |
 | `docs/sql/schema.sql` | MySQL schema |
 | `web/src/main/resources/db/h2-schema.sql` | H2 schema |
 | `docs/design/api-examples.http` | 接口示例 |

@@ -2,8 +2,8 @@
 -- 注意：该脚本只在数据卷为空时执行一次；重置数据请删除 mysql-data 卷
 -- 统一密码：admin123（BCrypt strength 10）
 
--- 如果数据库名不是 lty_workorder，请同步修改下面一行
-USE `lty_workorder`;
+-- 如果数据库名不是 fixguild，请同步修改下面一行
+USE `fixguild`;
 
 INSERT INTO sys_tenant (id, uid, tenant_code, tenant_name, contact_name, status, max_user_count, remark, create_by, update_by)
 VALUES (1, 'TENANT0001', 'T0001', '演示维保公司', '张三', 1, 50, '演示数据', 'system', 'system'),

@@ -1,6 +1,6 @@
-# lty-workorder
+# Fixguild · 匠盟
 
-多租户维保工单系统，基于 `kld-transport` 的技术栈做一个学习型项目。
+**Fixguild（匠盟）** — 多租户维保工单 SaaS，基于 `kld-transport` 的技术栈做一个学习型项目。
 
 ## 当前进度
 
@@ -32,7 +32,7 @@ Java 21 · Spring Boot 4.0.5 · MyBatis-Flex 1.11.8 · springdoc 3.0.3 · Hutool
 ```powershell
 .\mvnw.cmd clean test
 .\mvnw.cmd -DskipTests package
-java -jar web/target/lty-workorder.jar --spring.profiles.active=local
+java -jar web/target/fixguild.jar --spring.profiles.active=local
 ```
 
 也可以在 IDE 里直接运行 `WebApplication`，程序参数加：
@@ -53,7 +53,7 @@ java -jar web/target/lty-workorder.jar --spring.profiles.active=local
 - 健康检查：`http://localhost:8090/api/health`
 - Swagger：`http://localhost:8090/doc.html`（会跳转到 `/swagger-ui/index.html`）
 - H2 控制台：`http://localhost:8090/h2-console`
-  - JDBC URL：`jdbc:h2:mem:lty_workorder;MODE=MySQL;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DB_CLOSE_DELAY=-1`
+  - JDBC URL：`jdbc:h2:mem:fixguild;MODE=MySQL;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DB_CLOSE_DELAY=-1`
   - 用户名：`sa`
   - 密码：空
 
@@ -63,7 +63,7 @@ java -jar web/target/lty-workorder.jar --spring.profiles.active=local
 copy .env.example .env
 docker compose up -d
 .\mvnw.cmd -DskipTests package
-java -jar web/target/lty-workorder.jar --spring.profiles.active=dev
+java -jar web/target/fixguild.jar --spring.profiles.active=dev
 ```
 
 `application.yml` 默认激活 `local` profile（H2）；连接 MySQL 时显式指定 `dev` profile。
@@ -73,7 +73,7 @@ java -jar web/target/lty-workorder.jar --spring.profiles.active=dev
 | 服务 | 地址 |
 |---|---|
 | 应用 | `http://localhost:8090` |
-| MySQL | `localhost:3306`，库 `lty_workorder` |
+| MySQL | `localhost:3306`，库 `fixguild` |
 | Redis | `localhost:6379` |
 | MinIO API | `http://localhost:9000` |
 | MinIO 控制台 | `http://localhost:9001` |
@@ -113,7 +113,7 @@ java -jar web/target/lty-workorder.jar --spring.profiles.active=dev
 ## 目录结构
 
 ```text
-lty-workorder/
+fixguild/
 ├── common/          # 基础能力：响应、异常、租户、TraceId、MyBatis-Flex、OpenAPI
 ├── account/         # 租户、用户、角色、菜单、登录
 ├── core/            # 工单、派工、客户、设备、技师、附件

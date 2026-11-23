@@ -1,11 +1,13 @@
+name: fixguild
+
 services:
   mysql:
     image: mysql:8.4
-    container_name: lty-workorder-mysql
+    container_name: fixguild-mysql
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123456}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-lty_workorder}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-fixguild}
       MYSQL_USER: ${MYSQL_USER:-lty}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-lty123456}
       TZ: Asia/Shanghai
@@ -26,7 +28,7 @@ services:
 
   redis:
     image: redis:7
-    container_name: lty-workorder-redis
+    container_name: fixguild-redis
     restart: unless-stopped
     ports:
       - "6379:6379"
@@ -41,7 +43,7 @@ services:
 
   minio:
     image: minio/minio:latest
-    container_name: lty-workorder-minio
+    container_name: fixguild-minio
     restart: unless-stopped
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}

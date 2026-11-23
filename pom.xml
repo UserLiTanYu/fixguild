@@ -11,13 +11,13 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.lty.workorder</groupId>
-    <artifactId>lty-workorder</artifactId>
+    <groupId>com.fixguild</groupId>
+    <artifactId>fixguild</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>lty-workorder</name>
-    <description>多租户维保工单系统</description>
+    <name>Fixguild</name>
+    <description>匠盟 · 多租户维保工单 SaaS</description>
 
     <modules>
         <module>common</module>
@@ -42,17 +42,17 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>com.lty.workorder</groupId>
+                <groupId>com.fixguild</groupId>
                 <artifactId>common</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.lty.workorder</groupId>
+                <groupId>com.fixguild</groupId>
                 <artifactId>account</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.lty.workorder</groupId>
+                <groupId>com.fixguild</groupId>
                 <artifactId>core</artifactId>
                 <version>${project.version}</version>
             </dependency>

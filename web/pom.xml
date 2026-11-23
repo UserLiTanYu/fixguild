@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.lty.workorder</groupId>
-        <artifactId>lty-workorder</artifactId>
+        <groupId>com.fixguild</groupId>
+        <artifactId>fixguild</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
@@ -16,15 +16,15 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.lty.workorder</groupId>
+            <groupId>com.fixguild</groupId>
             <artifactId>common</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.lty.workorder</groupId>
+            <groupId>com.fixguild</groupId>
             <artifactId>account</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.lty.workorder</groupId>
+            <groupId>com.fixguild</groupId>
             <artifactId>core</artifactId>
         </dependency>
 
@@ -50,7 +50,7 @@
     </dependencies>
 
     <build>
-        <finalName>lty-workorder</finalName>
+        <finalName>fixguild</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

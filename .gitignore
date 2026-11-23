@@ -1,0 +1,21 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+
+.env
+*.log
+logs/
+
+.DS_Store
+Thumbs.db
+
+# 本地参考资料，不入库
+/docs/阿里巴巴Java开发手册.pdf

@@ -3,9 +3,8 @@ package com.fixguild.account.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.digest.BCrypt;
+import com.fixguild.account.support.AccountCredentialGenerator;
 import com.fixguild.account.entity.SysTenantEntity;
 import com.fixguild.account.entity.SysUserEntity;
 import com.fixguild.account.mapper.SysTenantMapper;
@@ -107,7 +106,7 @@ public class SysTenantServiceImpl implements SysTenantService {
 
         // 平台上下文 tenant_id=0，创建租户管理员属于跨租户写入；
         // @IgnoreTenant 关闭插件自动过滤，同时下面显式指定管理员 tenant_id
-        String initialPassword = generateInitialPassword();
+        String initialPassword = AccountCredentialGenerator.generateInitialPassword();
         SysUserEntity admin = buildInitialAdmin(param, entity.getTenantCode(), initialPassword);
         try {
             sysUserMapper.insert(admin);
@@ -181,18 +180,6 @@ public class SysTenantServiceImpl implements SysTenantService {
     }
 
     /**
-     * 生成租户初始管理员的临时密码。
-     *
-     * <p>固定前缀保证包含大写、小写和特殊字符，剩余部分随机；密码只在创建结果中
-     * 返回一次，数据库仅保存 BCrypt 哈希。</p>
-     *
-     * @return 初始密码明文
-     */
-    private String generateInitialPassword() {
-        return "Fg@" + RandomUtil.randomString(RandomUtil.BASE_CHAR_NUMBER, 12);
-    }
-
-    /**
      * 构造租户初始管理员。
      *
      * <p>租户管理员属于新租户，必须显式设置 tenant_id；平台端当前上下文是
@@ -208,10 +195,10 @@ public class SysTenantServiceImpl implements SysTenantService {
         admin.setUid(IdUtil.fastSimpleUUID());
         admin.setTenantId(tenantCode);
         admin.setClientCode(ClientCode.TENANT.getCode());
-        // user_code 是 Sa-Token loginId，必须全局唯一，使用 UUID 前缀避免碰撞
-        admin.setUserCode("U" + IdUtil.fastSimpleUUID().substring(0, 16).toUpperCase());
+        // user_code 是 Sa-Token loginId，必须全局唯一
+        admin.setUserCode(AccountCredentialGenerator.generateUserCode());
         admin.setUsername(param.getAdminUsername());
-        admin.setPassword(BCrypt.hashpw(initialPassword, BCrypt.gensalt(10)));
+        admin.setPassword(AccountCredentialGenerator.hashPassword(initialPassword));
         admin.setNickname(StrUtil.blankToDefault(param.getAdminNickname(), "租户管理员"));
         admin.setStatus(1);
         return admin;

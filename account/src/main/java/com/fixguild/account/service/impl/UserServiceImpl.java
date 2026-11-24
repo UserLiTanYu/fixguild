@@ -3,6 +3,7 @@ package com.fixguild.account.service.impl;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.BCrypt;
 import com.fixguild.account.entity.SysUserEntity;
+import com.fixguild.account.support.AccountCredentialGenerator;
 import com.fixguild.account.mapper.SysUserMapper;
 import com.fixguild.account.param.PasswordChangeParam;
 import com.fixguild.account.security.LoginAttemptGuard;
@@ -52,7 +53,7 @@ public class UserServiceImpl implements UserService {
 
         SysUserEntity update = new SysUserEntity();
         update.setId(user.getId());
-        update.setPassword(BCrypt.hashpw(param.getNewPassword(), BCrypt.gensalt(10)));
+        update.setPassword(AccountCredentialGenerator.hashPassword(param.getNewPassword()));
         sysUserMapper.update(update, true);
 
         // 密码已重置，清除该账号的登录失败记录，避免旧锁定状态影响重新登录

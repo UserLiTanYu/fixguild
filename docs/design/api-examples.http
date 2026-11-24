@@ -2,7 +2,7 @@
 ### 多租户维保工单系统 · 核心接口示例
 ### 适用于 IntelliJ HTTP Client / VS Code REST Client
 ### 说明：健康检查、登录、租户 CRUD、当前用户/权限菜单、退出、修改密码、
-###       租户端菜单树与角色管理可直接调用；工单、技师等接口是后续里程碑的设计示例。
+###       租户端菜单树、角色管理和用户管理可直接调用；工单、技师等接口是后续里程碑的设计示例。
 ### ============================================================
 
 @baseUrl = http://localhost:8090
@@ -122,6 +122,63 @@ Content-Type: application/json
 {
   "uid": "替换为角色 uid",
   "menuUids": ["MENU0010", "MENU0011", "MENU0012"]
+}
+
+### 租户端-用户分页
+POST {{baseUrl}}/tenant/api/user/page
+satoken: {{tenantToken}}
+client-code: tenant
+Content-Type: application/json
+
+{
+  "pageNum": 1,
+  "pageSize": 20
+}
+
+### 租户端-新增用户（初始密码仅返回一次）
+POST {{baseUrl}}/tenant/api/user/create
+satoken: {{tenantToken}}
+client-code: tenant
+Content-Type: application/json
+
+{
+  "username": "dispatcher01",
+  "nickname": "调度员一号",
+  "email": "dispatcher@example.com",
+  "roleUids": ["替换为角色 uid"]
+}
+
+### 租户端-编辑用户（uid 换成用户分页返回的值）
+POST {{baseUrl}}/tenant/api/user/update
+satoken: {{tenantToken}}
+client-code: tenant
+Content-Type: application/json
+
+{
+  "uid": "替换为用户 uid",
+  "nickname": "调度员一号-改",
+  "roleUids": ["替换为角色 uid"]
+}
+
+### 租户端-重置用户密码（新密码仅返回一次，目标用户登录态失效）
+POST {{baseUrl}}/tenant/api/user/reset-password
+satoken: {{tenantToken}}
+client-code: tenant
+Content-Type: application/json
+
+{
+  "uid": "替换为用户 uid"
+}
+
+### 租户端-用户启停（停用后目标用户登录态失效）
+POST {{baseUrl}}/tenant/api/user/status
+satoken: {{tenantToken}}
+client-code: tenant
+Content-Type: application/json
+
+{
+  "uid": "替换为用户 uid",
+  "status": 0
 }
 
 ### 平台端-租户分页

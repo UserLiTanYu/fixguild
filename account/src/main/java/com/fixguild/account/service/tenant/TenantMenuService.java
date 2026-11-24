@@ -1,4 +1,4 @@
-package com.fixguild.account.service;
+package com.fixguild.account.service.tenant;
 
 import com.fixguild.account.vo.MenuTreeVO;
 
@@ -10,7 +10,7 @@ import java.util.List;
  * @author litanyu
  * @since 2026-11-24
  */
-public interface MenuService {
+public interface TenantMenuService {
 
     /**
      * 查询指定登录端的完整菜单树，包含按钮节点，供角色分配菜单使用。

@@ -1,4 +1,4 @@
-package com.fixguild.account.service;
+package com.fixguild.account.service.tenant;
 
 import com.fixguild.account.entity.SysUserEntity;
 

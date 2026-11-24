@@ -1,4 +1,4 @@
-package com.fixguild.account.service.impl;
+package com.fixguild.account.service.tenant.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
@@ -18,7 +18,7 @@ import com.fixguild.account.param.TenantUserResetPasswordParam;
 import com.fixguild.account.param.TenantUserStatusParam;
 import com.fixguild.account.param.TenantUserUpdateParam;
 import com.fixguild.account.security.LoginAttemptGuard;
-import com.fixguild.account.service.TenantUserService;
+import com.fixguild.account.service.tenant.TenantUserService;
 import com.fixguild.account.support.AccountCredentialGenerator;
 import com.fixguild.account.vo.TenantUserCreateVO;
 import com.fixguild.account.vo.TenantUserResetPasswordVO;

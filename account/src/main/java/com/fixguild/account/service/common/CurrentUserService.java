@@ -1,4 +1,4 @@
-package com.fixguild.account.service;
+package com.fixguild.account.service.common;
 
 import com.fixguild.account.param.PasswordChangeParam;
 import com.fixguild.common.auth.LoginUser;
@@ -10,7 +10,7 @@ import com.fixguild.common.exception.BusinessException;
  * @author litanyu
  * @since 2026-11-24
  */
-public interface UserService {
+public interface CurrentUserService {
 
     /**
      * 修改当前登录用户密码。

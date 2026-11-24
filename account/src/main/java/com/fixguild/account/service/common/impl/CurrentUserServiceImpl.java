@@ -1,4 +1,4 @@
-package com.fixguild.account.service.impl;
+package com.fixguild.account.service.common.impl;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.BCrypt;
@@ -7,7 +7,7 @@ import com.fixguild.account.support.AccountCredentialGenerator;
 import com.fixguild.account.mapper.SysUserMapper;
 import com.fixguild.account.param.PasswordChangeParam;
 import com.fixguild.account.security.LoginAttemptGuard;
-import com.fixguild.account.service.UserService;
+import com.fixguild.account.service.common.CurrentUserService;
 import com.fixguild.common.auth.LoginUser;
 import com.fixguild.common.enums.ClientCode;
 import com.fixguild.common.enums.ErrorCode;
@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService {
+public class CurrentUserServiceImpl implements CurrentUserService {
 
     /** 用户表 Mapper。 */
     private final SysUserMapper sysUserMapper;

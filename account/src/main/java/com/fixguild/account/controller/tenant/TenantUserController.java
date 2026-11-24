@@ -1,4 +1,4 @@
-package com.fixguild.account.controller;
+package com.fixguild.account.controller.tenant;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.fixguild.account.param.TenantUserCreateParam;
@@ -6,7 +6,7 @@ import com.fixguild.account.param.TenantUserPageParam;
 import com.fixguild.account.param.TenantUserResetPasswordParam;
 import com.fixguild.account.param.TenantUserStatusParam;
 import com.fixguild.account.param.TenantUserUpdateParam;
-import com.fixguild.account.service.TenantUserService;
+import com.fixguild.account.service.tenant.TenantUserService;
 import com.fixguild.account.vo.TenantUserCreateVO;
 import com.fixguild.account.vo.TenantUserResetPasswordVO;
 import com.fixguild.account.vo.TenantUserVO;

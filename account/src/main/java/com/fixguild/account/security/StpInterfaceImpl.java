@@ -1,7 +1,7 @@
 package com.fixguild.account.security;
 
 import cn.dev33.satoken.stp.StpInterface;
-import com.fixguild.account.service.AuthService;
+import com.fixguild.account.service.auth.AuthService;
 import com.fixguild.common.auth.LoginContext;
 import com.fixguild.common.auth.LoginUser;
 import lombok.RequiredArgsConstructor;

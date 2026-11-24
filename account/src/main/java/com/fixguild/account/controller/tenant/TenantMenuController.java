@@ -1,7 +1,7 @@
-package com.fixguild.account.controller;
+package com.fixguild.account.controller.tenant;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
-import com.fixguild.account.service.MenuService;
+import com.fixguild.account.service.tenant.TenantMenuService;
 import com.fixguild.account.vo.MenuTreeVO;
 import com.fixguild.common.domain.CommonResponse;
 import com.fixguild.common.enums.ClientCode;
@@ -24,10 +24,10 @@ import java.util.List;
 @RequestMapping("/tenant/api/menu")
 @RequiredArgsConstructor
 @Tag(name = "租户端-菜单管理")
-public class MenuController {
+public class TenantMenuController {
 
     /** 菜单查询服务。 */
-    private final MenuService menuService;
+    private final TenantMenuService tenantMenuService;
 
     /**
      * 查询租户端完整菜单树，包含按钮节点。
@@ -38,6 +38,6 @@ public class MenuController {
     @Operation(summary = "菜单树", description = "返回租户端完整菜单树，包含按钮节点")
     @SaCheckPermission("tenant:menu:tree")
     public CommonResponse<List<MenuTreeVO>> tree() {
-        return CommonResponse.ok(menuService.tree(ClientCode.TENANT.getCode()));
+        return CommonResponse.ok(tenantMenuService.tree(ClientCode.TENANT.getCode()));
     }
 }

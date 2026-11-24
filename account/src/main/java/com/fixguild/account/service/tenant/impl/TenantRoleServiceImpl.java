@@ -1,4 +1,4 @@
-package com.fixguild.account.service.impl;
+package com.fixguild.account.service.tenant.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.IdUtil;
@@ -13,7 +13,7 @@ import com.fixguild.account.param.SysRoleCreateParam;
 import com.fixguild.account.param.SysRoleMenusParam;
 import com.fixguild.account.param.SysRolePageParam;
 import com.fixguild.account.param.SysRoleUpdateParam;
-import com.fixguild.account.service.SysRoleService;
+import com.fixguild.account.service.tenant.TenantRoleService;
 import com.fixguild.account.vo.SysRoleVO;
 import com.fixguild.common.auth.LoginContext;
 import com.fixguild.common.domain.PageResult;
@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class SysRoleServiceImpl implements SysRoleService {
+public class TenantRoleServiceImpl implements TenantRoleService {
 
     /** M2 租户角色数据范围：本租户。 */
     private static final int TENANT_DATA_SCOPE = 2;

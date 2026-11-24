@@ -1,8 +1,8 @@
-package com.fixguild.account.service.impl;
+package com.fixguild.account.service.tenant.impl;
 
 import com.fixguild.account.entity.SysMenuEntity;
 import com.fixguild.account.mapper.SysMenuMapper;
-import com.fixguild.account.service.MenuService;
+import com.fixguild.account.service.tenant.TenantMenuService;
 import com.fixguild.account.support.MenuTreeBuilder;
 import com.fixguild.account.vo.MenuTreeVO;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -19,7 +19,7 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
-public class MenuServiceImpl implements MenuService {
+public class TenantMenuServiceImpl implements TenantMenuService {
 
     /** 菜单 Mapper。 */
     private final SysMenuMapper sysMenuMapper;

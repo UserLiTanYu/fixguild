@@ -1,4 +1,4 @@
-package com.fixguild.account.service;
+package com.fixguild.account.service.tenant;
 
 import com.fixguild.account.param.SysRoleCreateParam;
 import com.fixguild.account.param.SysRoleMenusParam;
@@ -16,7 +16,7 @@ import com.fixguild.common.exception.BusinessException;
  * @author litanyu
  * @since 2026-11-24
  */
-public interface SysRoleService {
+public interface TenantRoleService {
 
     /**
      * 分页查询当前租户的租户端角色。

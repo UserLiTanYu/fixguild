@@ -1,11 +1,11 @@
-package com.fixguild.account.controller;
+package com.fixguild.account.controller.tenant;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.fixguild.account.param.SysRoleCreateParam;
 import com.fixguild.account.param.SysRoleMenusParam;
 import com.fixguild.account.param.SysRolePageParam;
 import com.fixguild.account.param.SysRoleUpdateParam;
-import com.fixguild.account.service.SysRoleService;
+import com.fixguild.account.service.tenant.TenantRoleService;
 import com.fixguild.account.vo.SysRoleVO;
 import com.fixguild.common.domain.CommonResponse;
 import com.fixguild.common.domain.PageResult;
@@ -28,10 +28,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/tenant/api/role")
 @RequiredArgsConstructor
 @Tag(name = "租户端-角色管理")
-public class RoleController {
+public class TenantRoleController {
 
     /** 角色管理服务。 */
-    private final SysRoleService sysRoleService;
+    private final TenantRoleService tenantRoleService;
 
     /**
      * 角色分页。
@@ -43,7 +43,7 @@ public class RoleController {
     @Operation(summary = "角色分页")
     @SaCheckPermission("tenant:role:page")
     public CommonResponse<PageResult<SysRoleVO>> page(@Valid @RequestBody SysRolePageParam param) {
-        return CommonResponse.ok(sysRoleService.page(param));
+        return CommonResponse.ok(tenantRoleService.page(param));
     }
 
     /**
@@ -56,7 +56,7 @@ public class RoleController {
     @Operation(summary = "新增角色")
     @SaCheckPermission("tenant:role:create")
     public CommonResponse<String> create(@Valid @RequestBody SysRoleCreateParam param) {
-        return CommonResponse.ok(sysRoleService.create(param));
+        return CommonResponse.ok(tenantRoleService.create(param));
     }
 
     /**
@@ -69,7 +69,7 @@ public class RoleController {
     @Operation(summary = "编辑角色")
     @SaCheckPermission("tenant:role:update")
     public CommonResponse<Void> update(@Valid @RequestBody SysRoleUpdateParam param) {
-        sysRoleService.update(param);
+        tenantRoleService.update(param);
         return CommonResponse.ok();
     }
 
@@ -83,7 +83,7 @@ public class RoleController {
     @Operation(summary = "分配角色菜单")
     @SaCheckPermission("tenant:role:menus")
     public CommonResponse<Void> menus(@Valid @RequestBody SysRoleMenusParam param) {
-        sysRoleService.bindMenus(param);
+        tenantRoleService.bindMenus(param);
         return CommonResponse.ok();
     }
 }

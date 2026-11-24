@@ -1,4 +1,4 @@
-package com.fixguild.account.service.impl;
+package com.fixguild.account.service.platform.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.DesensitizedUtil;
@@ -12,8 +12,8 @@ import com.fixguild.account.mapper.SysUserMapper;
 import com.fixguild.account.param.SysTenantCreateParam;
 import com.fixguild.account.param.SysTenantPageParam;
 import com.fixguild.account.param.SysTenantUpdateParam;
-import com.fixguild.account.service.SysTenantService;
-import com.fixguild.account.service.TenantProvisionService;
+import com.fixguild.account.service.platform.PlatformTenantService;
+import com.fixguild.account.service.tenant.TenantProvisionService;
 import com.fixguild.account.vo.SysTenantCreateVO;
 import com.fixguild.account.vo.SysTenantVO;
 import com.fixguild.common.annotation.IgnoreTenant;
@@ -42,7 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class SysTenantServiceImpl implements SysTenantService {
+public class PlatformTenantServiceImpl implements PlatformTenantService {
 
     /** 租户表 Mapper */
     private final SysTenantMapper sysTenantMapper;

@@ -1,4 +1,4 @@
-package com.fixguild.account.service.impl;
+package com.fixguild.account.service.tenant.impl;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
@@ -11,7 +11,7 @@ import com.fixguild.account.mapper.SysMenuMapper;
 import com.fixguild.account.mapper.SysRoleMapper;
 import com.fixguild.account.mapper.SysRoleMenuMapper;
 import com.fixguild.account.mapper.SysUserRoleMapper;
-import com.fixguild.account.service.TenantProvisionService;
+import com.fixguild.account.service.tenant.TenantProvisionService;
 import com.fixguild.common.annotation.IgnoreTenant;
 import com.fixguild.common.auth.LoginContext;
 import com.fixguild.common.enums.ClientCode;

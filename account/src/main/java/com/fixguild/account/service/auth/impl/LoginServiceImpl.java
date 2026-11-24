@@ -1,4 +1,4 @@
-package com.fixguild.account.service.impl;
+package com.fixguild.account.service.auth.impl;
 
 import cn.dev33.satoken.session.SaSession;
 import cn.dev33.satoken.stp.SaTokenInfo;
@@ -16,7 +16,7 @@ import com.fixguild.account.param.PlatformLoginParam;
 import com.fixguild.account.param.TechnicianLoginParam;
 import com.fixguild.account.param.TenantLoginParam;
 import com.fixguild.account.security.LoginAttemptGuard;
-import com.fixguild.account.service.LoginService;
+import com.fixguild.account.service.auth.LoginService;
 import com.fixguild.account.vo.LoginVO;
 import com.fixguild.account.vo.UserInfoVO;
 import com.fixguild.common.auth.AuthConstants;

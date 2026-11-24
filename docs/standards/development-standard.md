@@ -173,9 +173,20 @@ public class WebApplication {
 
 ```text
 com.fixguild.{module}
-├── controller        # 接口层
-├── service           # 业务接口
-│   └── impl          # 业务实现
+├── controller        # 接口层，按 platform/tenant/technician/common 分包
+│   ├── platform
+│   ├── tenant
+│   ├── technician
+│   └── common
+├── service           # 业务接口，按 auth/platform/tenant/common 分包
+│   ├── auth
+│   │   └── impl
+│   ├── platform
+│   │   └── impl
+│   ├── tenant
+│   │   └── impl
+│   └── common
+│       └── impl
 ├── mapper            # MyBatis-Flex Mapper
 ├── entity            # 数据库实体
 ├── param             # 入参
@@ -206,9 +217,9 @@ com.fixguild.common
 
 | 类型 | 规则 | 示例 |
 |---|---|---|
-| Controller | `XxxController` | `SysTenantController` |
-| Service 接口 | `XxxService` | `SysTenantService` |
-| Service 实现 | `XxxServiceImpl` | `SysTenantServiceImpl` |
+| Controller | `XxxController` | `PlatformTenantController` |
+| Service 接口 | `XxxService` | `PlatformTenantService` |
+| Service 实现 | `XxxServiceImpl` | `PlatformTenantServiceImpl` |
 | Mapper | `XxxMapper` | `SysTenantMapper` |
 | 实体 | `XxxEntity` | `SysTenantEntity` |
 | 分页入参 | `XxxPageParam` | `CustomerPageParam` |
@@ -344,25 +355,25 @@ com.fixguild.common
 @RequestMapping("/platform/api/tenant")
 @RequiredArgsConstructor
 @Tag(name = "平台端-租户管理")
-public class SysTenantController {
+public class PlatformTenantController {
 
-    private final SysTenantService sysTenantService;
+    private final PlatformTenantService platformTenantService;
 
     @PostMapping("/page")
     @Operation(summary = "租户分页")
     public CommonResponse<PageResult<SysTenantVO>> page(@Valid @RequestBody SysTenantPageParam param) {
-        return CommonResponse.ok(sysTenantService.page(param));
+        return CommonResponse.ok(platformTenantService.page(param));
     }
 
     @PostMapping("/create")
     @Operation(summary = "新增租户")
     public CommonResponse<String> create(@Valid @RequestBody SysTenantCreateParam param) {
-        return CommonResponse.ok(sysTenantService.create(param));
+        return CommonResponse.ok(platformTenantService.create(param));
     }
 }
 ```
 
-> 当前 `SysTenantController` 已按本节拆分 Param 并使用 `@Valid`；后续新增接口沿用同样方式。
+> 当前 `PlatformTenantController` 已按本节拆分 Param 并使用 `@Valid`；后续新增接口沿用同样方式。
 
 ### 5.2 Service
 
@@ -370,7 +381,7 @@ public class SysTenantController {
 
 **规则**：
 
-- 业务 Service **必须**是"接口 + 实现"：接口放 `service`，实现放 `service.impl`。
+- 业务 Service **必须**是"接口 + 实现"：接口放 `service.{auth|platform|tenant|common}`，实现放对应的 `service.{domain}.impl`。
 - 实现类**必须**使用 `@Service`、`@RequiredArgsConstructor`、`@Slf4j`。
 - 写操作方法**必须**标注 `@Transactional(rollbackFor = Exception.class)`。
 - 读方法不需要事务；复杂只读查询可用 `@Transactional(readOnly = true)`（建议，不强制）。
@@ -382,7 +393,7 @@ public class SysTenantController {
 标准写法：
 
 ```java
-public interface SysTenantService {
+public interface PlatformTenantService {
 
     PageResult<SysTenantVO> page(SysTenantPageParam param);
 
@@ -400,7 +411,7 @@ public interface SysTenantService {
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class SysTenantServiceImpl implements SysTenantService {
+public class PlatformTenantServiceImpl implements PlatformTenantService {
 
     private final SysTenantMapper sysTenantMapper;
 
@@ -646,7 +657,7 @@ sysTenantMapper.update(update, true);
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class SysTenantServiceImpl implements SysTenantService {
+public class PlatformTenantServiceImpl implements PlatformTenantService {
 
     private final SysTenantMapper sysTenantMapper;
 }
@@ -720,7 +731,7 @@ public class SysTenantServiceImpl implements SysTenantService {
  *
  * <p>租户表是平台级全局表；所有写操作在事务内完成。</p>
  */
-public interface SysTenantService {
+public interface PlatformTenantService {
 
     /**
      * 新增租户。
@@ -2253,8 +2264,8 @@ docker compose down -v   # 连同数据卷一起删除，重置数据库
 | `common/src/main/java/com/fixguild/common/exception/GlobalExceptionHandler.java` | 全局异常 |
 | `common/src/main/java/com/fixguild/common/tenant/TenantContext.java` | 租户上下文 |
 | `common/src/main/java/com/fixguild/common/filter/TraceIdFilter.java` | traceId |
-| `account/src/main/java/com/fixguild/account/controller/SysTenantController.java` | 分层参考 |
-| `account/src/main/java/com/fixguild/account/service/impl/SysTenantServiceImpl.java` | Service 参考 |
+| `account/src/main/java/com/fixguild/account/controller/platform/PlatformTenantController.java` | 分层参考 |
+| `account/src/main/java/com/fixguild/account/service/platform/impl/PlatformTenantServiceImpl.java` | Service 参考 |
 | `docs/sql/schema.sql` | MySQL schema |
 | `web/src/main/resources/db/h2-schema.sql` | H2 schema |
 | `docs/design/api-examples.http` | 接口示例 |

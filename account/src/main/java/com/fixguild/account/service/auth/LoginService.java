@@ -1,4 +1,4 @@
-package com.fixguild.account.service;
+package com.fixguild.account.service.auth;
 
 import com.fixguild.account.param.PlatformLoginParam;
 import com.fixguild.account.param.TechnicianLoginParam;

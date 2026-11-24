@@ -1,4 +1,4 @@
-package com.fixguild.account.service.impl;
+package com.fixguild.account.service.auth.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
@@ -12,7 +12,7 @@ import com.fixguild.account.mapper.SysRoleMapper;
 import com.fixguild.account.mapper.SysRoleMenuMapper;
 import com.fixguild.account.mapper.SysUserMapper;
 import com.fixguild.account.mapper.SysUserRoleMapper;
-import com.fixguild.account.service.AuthService;
+import com.fixguild.account.service.auth.AuthService;
 import com.fixguild.account.support.MenuTreeBuilder;
 import com.fixguild.account.vo.MenuTreeVO;
 import com.fixguild.account.vo.UserAuthVO;

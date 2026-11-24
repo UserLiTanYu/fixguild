@@ -1,9 +1,9 @@
-package com.fixguild.account.controller;
+package com.fixguild.account.controller.common;
 
 import cn.dev33.satoken.stp.StpUtil;
 import com.fixguild.account.param.PasswordChangeParam;
-import com.fixguild.account.service.AuthService;
-import com.fixguild.account.service.UserService;
+import com.fixguild.account.service.auth.AuthService;
+import com.fixguild.account.service.common.CurrentUserService;
 import com.fixguild.account.vo.UserAuthVO;
 import com.fixguild.account.vo.UserInfoVO;
 import com.fixguild.common.auth.LoginContext;
@@ -34,13 +34,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/account/api")
 @RequiredArgsConstructor
 @Tag(name = "账号权限-当前用户")
-public class UserController {
+public class CurrentUserController {
 
     /** 权限查询服务。 */
     private final AuthService authService;
 
     /** 用户账号服务。 */
-    private final UserService userService;
+    private final CurrentUserService currentUserService;
 
     /**
      * 查询当前用户信息。
@@ -94,7 +94,7 @@ public class UserController {
     public CommonResponse<Void> changePassword(@PathVariable String client,
                                                @Valid @RequestBody PasswordChangeParam param) {
         LoginUser loginUser = currentLogin(client);
-        userService.changePassword(loginUser, param);
+        currentUserService.changePassword(loginUser, param);
         StpUtil.logout();
         return CommonResponse.ok();
     }

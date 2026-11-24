@@ -1,4 +1,4 @@
-package com.fixguild.account.service;
+package com.fixguild.account.service.platform;
 
 import com.fixguild.account.param.SysTenantCreateParam;
 import com.fixguild.account.param.SysTenantPageParam;
@@ -17,7 +17,7 @@ import com.fixguild.common.exception.BusinessException;
  * @author litanyu
  * @since 2026-11-19
  */
-public interface SysTenantService {
+public interface PlatformTenantService {
 
     /**
      * 分页查询租户。

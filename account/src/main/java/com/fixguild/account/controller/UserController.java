@@ -1,6 +1,9 @@
 package com.fixguild.account.controller;
 
+import cn.dev33.satoken.stp.StpUtil;
+import com.fixguild.account.param.PasswordChangeParam;
 import com.fixguild.account.service.AuthService;
+import com.fixguild.account.service.UserService;
 import com.fixguild.account.vo.UserAuthVO;
 import com.fixguild.account.vo.UserInfoVO;
 import com.fixguild.common.auth.LoginContext;
@@ -11,9 +14,11 @@ import com.fixguild.common.enums.ErrorCode;
 import com.fixguild.common.exception.BusinessException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,6 +38,9 @@ public class UserController {
 
     /** 权限查询服务。 */
     private final AuthService authService;
+
+    /** 用户账号服务。 */
+    private final UserService userService;
 
     /**
      * 查询当前用户信息。
@@ -58,6 +66,37 @@ public class UserController {
     public CommonResponse<UserAuthVO> auth(@PathVariable String client) {
         LoginUser loginUser = currentLogin(client);
         return CommonResponse.ok(authService.getAuth(loginUser));
+    }
+
+    /**
+     * 退出当前登录。
+     *
+     * @param client 登录端编码
+     * @return 统一响应
+     */
+    @PostMapping("/{client}/logout")
+    @Operation(summary = "退出登录")
+    public CommonResponse<Void> logout(@PathVariable String client) {
+        currentLogin(client);
+        StpUtil.logout();
+        return CommonResponse.ok();
+    }
+
+    /**
+     * 修改当前用户密码，成功后退出当前登录。
+     *
+     * @param client 登录端编码
+     * @param param  修改密码参数
+     * @return 统一响应
+     */
+    @PostMapping("/{client}/password/change")
+    @Operation(summary = "修改密码", description = "校验旧密码，修改成功后退出当前登录")
+    public CommonResponse<Void> changePassword(@PathVariable String client,
+                                               @Valid @RequestBody PasswordChangeParam param) {
+        LoginUser loginUser = currentLogin(client);
+        userService.changePassword(loginUser, param);
+        StpUtil.logout();
+        return CommonResponse.ok();
     }
 
     /**

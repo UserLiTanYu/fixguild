@@ -65,7 +65,7 @@
 | 功能 | 路径 | 权限 |
 |---|---|---|
 | 租户分页 | `POST /platform/api/tenant/page` | `platform:tenant:page` |
-| 租户新增 | `POST /platform/api/tenant/create` | `platform:tenant:create` |
+| 租户新增（含初始管理员） | `POST /platform/api/tenant/create` | `platform:tenant:create` |
 | 租户编辑 | `POST /platform/api/tenant/update` | `platform:tenant:update` |
 | 租户启停 | `POST /platform/api/tenant/status` | `platform:tenant:status` |
 | 租户详情 | `POST /platform/api/tenant/detail` | `platform:tenant:detail` |
@@ -77,6 +77,9 @@
 | MQ 失败重试 | `POST /platform/api/mq/fail/retry` | `platform:mq:retry` |
 
 > 平台跨租户查询必须走 `@IgnoreTenant`，并在操作日志中记录。
+>
+> 创建租户时会同步创建租户端初始管理员，响应中的 `initialPassword` 只返回一次，
+> 数据库仅保存 BCrypt 哈希；默认管理员角色与菜单权限在 RBAC 任务中补齐。
 
 ## 7.4 租户端接口
 

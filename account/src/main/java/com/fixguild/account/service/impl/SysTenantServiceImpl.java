@@ -3,15 +3,22 @@ package com.fixguild.account.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.digest.BCrypt;
 import com.fixguild.account.entity.SysTenantEntity;
+import com.fixguild.account.entity.SysUserEntity;
 import com.fixguild.account.mapper.SysTenantMapper;
+import com.fixguild.account.mapper.SysUserMapper;
 import com.fixguild.account.param.SysTenantCreateParam;
 import com.fixguild.account.param.SysTenantPageParam;
 import com.fixguild.account.param.SysTenantUpdateParam;
 import com.fixguild.account.service.SysTenantService;
+import com.fixguild.account.vo.SysTenantCreateVO;
 import com.fixguild.account.vo.SysTenantVO;
+import com.fixguild.common.annotation.IgnoreTenant;
 import com.fixguild.common.domain.PageResult;
+import com.fixguild.common.enums.ClientCode;
 import com.fixguild.common.enums.ErrorCode;
 import com.fixguild.common.exception.BusinessException;
 import com.mybatisflex.core.paginate.Page;
@@ -40,6 +47,9 @@ public class SysTenantServiceImpl implements SysTenantService {
     /** 租户表 Mapper */
     private final SysTenantMapper sysTenantMapper;
 
+    /** 用户表 Mapper */
+    private final SysUserMapper sysUserMapper;
+
     /** {@inheritDoc} */
     @Override
     public PageResult<SysTenantVO> page(SysTenantPageParam param) {
@@ -63,8 +73,9 @@ public class SysTenantServiceImpl implements SysTenantService {
 
     /** {@inheritDoc} */
     @Override
+    @IgnoreTenant
     @Transactional(rollbackFor = Exception.class)
-    public String create(SysTenantCreateParam param) {
+    public SysTenantCreateVO create(SysTenantCreateParam param) {
         // 先查重给出友好提示；数据库唯一索引仍是并发场景的最终兜底
         long exists = sysTenantMapper.selectCountByQuery(
                 QueryWrapper.create().eq(SysTenantEntity::getTenantCode, param.getTenantCode()));
@@ -90,8 +101,20 @@ public class SysTenantServiceImpl implements SysTenantService {
             throw new BusinessException(ErrorCode.CONFLICT, "租户编码已存在");
         }
 
-        log.info("创建租户成功: tenantCode={}, uid={}", entity.getTenantCode(), entity.getUid());
-        return entity.getUid();
+        // 平台上下文 tenant_id=0，创建租户管理员属于跨租户写入；
+        // @IgnoreTenant 关闭插件自动过滤，同时下面显式指定管理员 tenant_id
+        String initialPassword = generateInitialPassword();
+        SysUserEntity admin = buildInitialAdmin(param, entity.getTenantCode(), initialPassword);
+        try {
+            sysUserMapper.insert(admin);
+        } catch (DuplicateKeyException e) {
+            // 用户编码或租户内登录名冲突时回滚租户，避免产生没有管理员的租户
+            throw new BusinessException(ErrorCode.CONFLICT, "初始管理员创建失败，请重试");
+        }
+
+        log.info("创建租户成功: tenantCode={}, uid={}, adminUsername={}",
+                entity.getTenantCode(), entity.getUid(), admin.getUsername());
+        return toCreateVO(entity, admin, initialPassword);
     }
 
     /** {@inheritDoc} */
@@ -149,6 +172,61 @@ public class SysTenantServiceImpl implements SysTenantService {
             throw new BusinessException(ErrorCode.NOT_FOUND, "租户不存在");
         }
         return entity;
+    }
+
+    /**
+     * 生成租户初始管理员的临时密码。
+     *
+     * <p>固定前缀保证包含大写、小写和特殊字符，剩余部分随机；密码只在创建结果中
+     * 返回一次，数据库仅保存 BCrypt 哈希。</p>
+     *
+     * @return 初始密码明文
+     */
+    private String generateInitialPassword() {
+        return "Fg@" + RandomUtil.randomString(RandomUtil.BASE_CHAR_NUMBER, 12);
+    }
+
+    /**
+     * 构造租户初始管理员。
+     *
+     * <p>租户管理员属于新租户，必须显式设置 tenant_id；平台端当前上下文是
+     * tenant_id=0，不能依赖租户插件自动填充。</p>
+     *
+     * @param param           新增租户参数
+     * @param tenantCode      新租户编码
+     * @param initialPassword 初始密码明文
+     * @return 待插入的管理员实体
+     */
+    private SysUserEntity buildInitialAdmin(SysTenantCreateParam param, String tenantCode, String initialPassword) {
+        SysUserEntity admin = new SysUserEntity();
+        admin.setUid(IdUtil.fastSimpleUUID());
+        admin.setTenantId(tenantCode);
+        admin.setClientCode(ClientCode.TENANT.getCode());
+        // user_code 是 Sa-Token loginId，必须全局唯一，使用 UUID 前缀避免碰撞
+        admin.setUserCode("U" + IdUtil.fastSimpleUUID().substring(0, 16).toUpperCase());
+        admin.setUsername(param.getAdminUsername());
+        admin.setPassword(BCrypt.hashpw(initialPassword, BCrypt.gensalt(10)));
+        admin.setNickname(StrUtil.blankToDefault(param.getAdminNickname(), "租户管理员"));
+        admin.setStatus(1);
+        return admin;
+    }
+
+    /**
+     * 构造创建租户结果。
+     *
+     * @param tenant          租户实体
+     * @param admin           初始管理员实体
+     * @param initialPassword 初始密码明文
+     * @return 创建结果
+     */
+    private SysTenantCreateVO toCreateVO(SysTenantEntity tenant, SysUserEntity admin, String initialPassword) {
+        SysTenantCreateVO vo = new SysTenantCreateVO();
+        vo.setUid(tenant.getUid());
+        vo.setTenantCode(tenant.getTenantCode());
+        vo.setAdminUsername(admin.getUsername());
+        vo.setAdminUserUid(admin.getUid());
+        vo.setInitialPassword(initialPassword);
+        return vo;
     }
 
     /**

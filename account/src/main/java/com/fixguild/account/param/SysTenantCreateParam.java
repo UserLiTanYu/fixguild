@@ -13,7 +13,8 @@ import java.time.LocalDateTime;
 /**
  * 新增租户参数。
  *
- * <p>租户编码平台内唯一；状态为空时默认启用，最大用户数为空时默认 50。</p>
+ * <p>租户编码平台内唯一；状态为空时默认启用，最大用户数为空时默认 50。
+ * 平台创建租户时会同步创建初始管理员，管理员登录名必填。</p>
  *
  * @author litanyu
  * @since 2026-11-19
@@ -59,6 +60,17 @@ public class SysTenantCreateParam {
     @Min(value = 1, message = "最大用户数必须大于 0")
     @Schema(description = "最大用户数")
     private Integer maxUserCount;
+
+    /** 初始管理员登录名，租户内唯一 */
+    @NotBlank(message = "初始管理员登录名不能为空")
+    @Size(max = 64, message = "初始管理员登录名长度不能超过 64")
+    @Schema(description = "初始管理员登录名", example = "tenant_admin")
+    private String adminUsername;
+
+    /** 初始管理员昵称，为空时使用“租户管理员” */
+    @Size(max = 64, message = "初始管理员昵称长度不能超过 64")
+    @Schema(description = "初始管理员昵称", example = "租户管理员")
+    private String adminNickname;
 
     /** 备注，最长 500 */
     @Size(max = 500, message = "备注长度不能超过 500")

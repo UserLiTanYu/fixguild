@@ -3,6 +3,7 @@ package com.fixguild.account.service;
 import com.fixguild.account.param.SysTenantCreateParam;
 import com.fixguild.account.param.SysTenantPageParam;
 import com.fixguild.account.param.SysTenantUpdateParam;
+import com.fixguild.account.vo.SysTenantCreateVO;
 import com.fixguild.account.vo.SysTenantVO;
 import com.fixguild.common.domain.PageResult;
 import com.fixguild.common.exception.BusinessException;
@@ -38,15 +39,16 @@ public interface SysTenantService {
     SysTenantVO detail(String uid);
 
     /**
-     * 新增租户。
+     * 新增租户，并同步创建租户端初始管理员。
      *
-     * <p>租户编码平台内唯一；状态为空时默认启用，最大用户数为空时默认 50。</p>
+     * <p>租户编码平台内唯一；状态为空时默认启用，最大用户数为空时默认 50。
+     * 初始管理员与租户在同一事务内创建，初始密码只在返回结果中出现一次。</p>
      *
      * @param param 新增参数
-     * @return 租户业务 ID
+     * @return 租户业务 ID、初始管理员账号和一次性初始密码
      * @throws BusinessException 租户编码重复时抛出 409
      */
-    String create(SysTenantCreateParam param);
+    SysTenantCreateVO create(SysTenantCreateParam param);
 
     /**
      * 编辑租户。

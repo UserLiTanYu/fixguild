@@ -108,7 +108,8 @@ class SysTenantApiTest {
         mockMvc.perform(platformPost("/platform/api/tenant/create", """
                         {
                           "tenantCode": "T%s",
-                          "tenantName": "   "
+                          "tenantName": "   ",
+                          "adminUsername": "tenant_admin"
                         }
                         """.formatted(System.currentTimeMillis())))
                 .andExpect(status().isOk())
@@ -123,7 +124,8 @@ class SysTenantApiTest {
         mockMvc.perform(platformPost("/platform/api/tenant/create", """
                         {
                           "tenantCode": "T%s",
-                          "tenantName": "%s"
+                          "tenantName": "%s",
+                          "adminUsername": "tenant_admin"
                         }
                         """.formatted(System.currentTimeMillis(), tenantName)))
                 .andExpect(status().isOk())
@@ -153,7 +155,8 @@ class SysTenantApiTest {
         String body = """
                 {
                   "tenantCode": "D%s",
-                  "tenantName": "重复租户"
+                  "tenantName": "重复租户",
+                  "adminUsername": "tenant_admin"
                 }
                 """.formatted(System.currentTimeMillis());
 
@@ -194,17 +197,23 @@ class SysTenantApiTest {
                           "tenantName": "测试租户",
                           "contactName": "李四",
                           "contactMobile": "13800000000",
-                          "maxUserCount": 20
+                          "maxUserCount": 20,
+                          "adminUsername": "tenant_admin",
+                          "adminNickname": "测试租户管理员"
                         }
                         """.formatted(tenantCode)))
                 .andExpect(status().isOk())
                 .andExpect(header().exists("X-Trace-Id"))
                 .andExpect(jsonPath("$.code").value(0))
-                .andExpect(jsonPath("$.data").isString())
+                .andExpect(jsonPath("$.data.uid").isString())
+                .andExpect(jsonPath("$.data.tenantCode").value(tenantCode))
+                .andExpect(jsonPath("$.data.adminUsername").value("tenant_admin"))
+                .andExpect(jsonPath("$.data.adminUserUid").isString())
+                .andExpect(jsonPath("$.data.initialPassword").isNotEmpty())
                 .andReturn();
 
         JsonNode createJson = objectMapper.readTree(createResult.getResponse().getContentAsString());
-        String uid = createJson.get("data").asString();
+        String uid = createJson.path("data").path("uid").asString();
 
         mockMvc.perform(platformPost("/platform/api/tenant/page", """
                         {
@@ -247,6 +256,56 @@ class SysTenantApiTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.tenantName").value("测试租户-改名"))
                 .andExpect(jsonPath("$.data.status").value(0));
+    }
+
+    /** 初始管理员登录名为空应返回 400。 */
+    @Test
+    void shouldReturn400WhenAdminUsernameBlank() throws Exception {
+        mockMvc.perform(platformPost("/platform/api/tenant/create", """
+                        {
+                          "tenantCode": "T%s",
+                          "tenantName": "无管理员租户"
+                        }
+                        """.formatted(System.currentTimeMillis())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(400));
+    }
+
+    /** 创建租户后应能使用返回的初始密码登录租户端。 */
+    @Test
+    void createdTenantAdminShouldLoginWithInitialPassword() throws Exception {
+        String tenantCode = "T" + System.currentTimeMillis();
+        String adminUsername = "tenant_admin";
+
+        MvcResult createResult = mockMvc.perform(platformPost("/platform/api/tenant/create", """
+                        {
+                          "tenantCode": "%s",
+                          "tenantName": "登录测试租户",
+                          "adminUsername": "%s"
+                        }
+                        """.formatted(tenantCode, adminUsername)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data.initialPassword").isNotEmpty())
+                .andReturn();
+
+        JsonNode createJson = objectMapper.readTree(createResult.getResponse().getContentAsString());
+        String initialPassword = createJson.path("data").path("initialPassword").asString();
+
+        mockMvc.perform(post("/account/api/tenant/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "tenantCode": "%s",
+                                  "username": "%s",
+                                  "password": "%s"
+                                }
+                                """.formatted(tenantCode, adminUsername, initialPassword)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data.tokenValue").isNotEmpty())
+                .andExpect(jsonPath("$.data.userInfo.tenantId").value(tenantCode))
+                .andExpect(jsonPath("$.data.userInfo.username").value(adminUsername));
     }
 
     /** 构造平台端 POST 请求。 */

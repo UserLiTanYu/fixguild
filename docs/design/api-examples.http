@@ -10,6 +10,9 @@
 @tenantToken = 替换为租户登录返回的 token
 @techToken = 替换为技师登录返回的 token
 @tenantCode = T0001
+@newTenantCode = T1001
+@newAdminUsername = tenant_admin
+@newAdminPassword = 替换为新增租户返回的初始密码
 @requestId = 01JABCDEF00000000000000001
 
 ### 健康检查（白名单）
@@ -32,6 +35,16 @@ Content-Type: application/json
   "tenantCode": "{{tenantCode}}",
   "username": "tenant_admin",
   "password": "admin123"
+}
+
+### 新租户初始管理员登录（密码来自新增租户响应，仅返回一次）
+POST {{baseUrl}}/account/api/tenant/login
+Content-Type: application/json
+
+{
+  "tenantCode": "{{newTenantCode}}",
+  "username": "{{newAdminUsername}}",
+  "password": "{{newAdminPassword}}"
 }
 
 ### 技师登录（短信验证码，开发环境固定 123456）
@@ -66,7 +79,7 @@ Content-Type: application/json
   "tenantName": "维保"
 }
 
-### 平台端-新增租户（M1 可直接调用）
+### 平台端-新增租户（同步创建初始管理员，初始密码仅返回一次）
 POST {{baseUrl}}/platform/api/tenant/create
 Content-Type: application/json
 
@@ -76,8 +89,23 @@ Content-Type: application/json
   "contactName": "李四",
   "contactMobile": "13800000000",
   "maxUserCount": 20,
+  "adminUsername": "tenant_admin",
+  "adminNickname": "租户管理员",
   "remark": "M1 演示"
 }
+
+### 新增租户响应示例（data.initialPassword 需要妥善保存）
+# {
+#   "code": 0,
+#   "msg": "success",
+#   "data": {
+#     "uid": "租户业务ID",
+#     "tenantCode": "T1001",
+#     "adminUsername": "tenant_admin",
+#     "adminUserUid": "管理员业务ID",
+#     "initialPassword": "Fg@a1b2c3d4e5f6"
+#   }
+# }
 
 ### 平台端-租户详情（M1 可直接调用，uid 换成新增返回的值）
 POST {{baseUrl}}/platform/api/tenant/detail

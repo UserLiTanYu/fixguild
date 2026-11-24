@@ -6,6 +6,7 @@ import com.fixguild.account.param.SysTenantStatusParam;
 import com.fixguild.account.param.SysTenantUidParam;
 import com.fixguild.account.param.SysTenantUpdateParam;
 import com.fixguild.account.service.SysTenantService;
+import com.fixguild.account.vo.SysTenantCreateVO;
 import com.fixguild.account.vo.SysTenantVO;
 import com.fixguild.common.domain.CommonResponse;
 import com.fixguild.common.domain.PageResult;
@@ -49,14 +50,14 @@ public class SysTenantController {
     }
 
     /**
-     * 新增租户。
+     * 新增租户，并同步创建租户端初始管理员。
      *
      * @param param 新增参数
-     * @return 统一响应，data 为租户业务 ID
+     * @return 统一响应，data 包含租户 ID、管理员账号和一次性初始密码
      */
     @PostMapping("/create")
-    @Operation(summary = "新增租户")
-    public CommonResponse<String> create(@Valid @RequestBody SysTenantCreateParam param) {
+    @Operation(summary = "新增租户", description = "同步创建租户端初始管理员，初始密码仅返回一次")
+    public CommonResponse<SysTenantCreateVO> create(@Valid @RequestBody SysTenantCreateParam param) {
         return CommonResponse.ok(sysTenantService.create(param));
     }
 

@@ -14,6 +14,7 @@ import com.fixguild.account.param.SysTenantCreateParam;
 import com.fixguild.account.param.SysTenantPageParam;
 import com.fixguild.account.param.SysTenantUpdateParam;
 import com.fixguild.account.service.SysTenantService;
+import com.fixguild.account.service.TenantProvisionService;
 import com.fixguild.account.vo.SysTenantCreateVO;
 import com.fixguild.account.vo.SysTenantVO;
 import com.fixguild.common.annotation.IgnoreTenant;
@@ -49,6 +50,9 @@ public class SysTenantServiceImpl implements SysTenantService {
 
     /** 用户表 Mapper */
     private final SysUserMapper sysUserMapper;
+
+    /** 租户开通初始化服务 */
+    private final TenantProvisionService tenantProvisionService;
 
     /** {@inheritDoc} */
     @Override
@@ -111,6 +115,8 @@ public class SysTenantServiceImpl implements SysTenantService {
             // 用户编码或租户内登录名冲突时回滚租户，避免产生没有管理员的租户
             throw new BusinessException(ErrorCode.CONFLICT, "初始管理员创建失败，请重试");
         }
+        // 同事务创建租户管理员角色并绑定租户端菜单，失败时租户和管理员一起回滚
+        tenantProvisionService.provisionTenantAdmin(admin);
 
         log.info("创建租户成功: tenantCode={}, uid={}, adminUsername={}",
                 entity.getTenantCode(), entity.getUid(), admin.getUsername());

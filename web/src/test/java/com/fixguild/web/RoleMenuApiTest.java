@@ -14,6 +14,9 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -236,6 +239,55 @@ class RoleMenuApiTest {
                 .isEqualTo("T0002 同名角色");
     }
 
+    /** 角色菜单变更后，已登录用户的权限应立即生效。 */
+    @Test
+    void roleMenusShouldTakeEffectImmediately() throws Exception {
+        String roleCode = "live_" + System.currentTimeMillis();
+        String roleUid = createRole(roleCode, "即时权限角色");
+        String username = "live_" + System.currentTimeMillis();
+        JsonNode createUser = postJson("/tenant/api/user/create", tenantAdminToken, "tenant", """
+                {
+                  "username": "%s",
+                  "nickname": "即时权限用户",
+                  "roleUids": ["%s"]
+                }
+                """.formatted(username, roleUid));
+        assertThat(createUser.path("code").asInt()).isZero();
+        String password = createUser.path("data").path("initialPassword").asString();
+        String userToken = loginToken("/account/api/tenant/login", """
+                {
+                  "tenantCode": "T0001",
+                  "username": "%s",
+                  "password": "%s"
+                }
+                """.formatted(username, password));
+
+        assertThat(postJson("/tenant/api/user/page", userToken, "tenant", """
+                {"pageNum":1,"pageSize":10}
+                """).path("code").asInt()).isEqualTo(403);
+
+        JsonNode bind = postJson("/tenant/api/role/menus", tenantAdminToken, "tenant", """
+                {
+                  "uid": "%s",
+                  "menuUids": ["MENU0010", "MENU0011", "MENU0012"]
+                }
+                """.formatted(roleUid));
+        assertThat(bind.path("code").asInt()).isZero();
+        JsonNode auth = postJson("/account/api/tenant/user/auth", userToken, "tenant", null);
+        assertThat(texts(auth.path("data").path("permissions"))).contains("tenant:user:page");
+        assertThat(postJson("/tenant/api/user/page", userToken, "tenant", """
+                {"pageNum":1,"pageSize":10}
+                """).path("code").asInt()).isZero();
+
+        JsonNode clear = postJson("/tenant/api/role/menus", tenantAdminToken, "tenant", """
+                {"uid":"%s","menuUids":[]}
+                """.formatted(roleUid));
+        assertThat(clear.path("code").asInt()).isZero();
+        assertThat(postJson("/tenant/api/user/page", userToken, "tenant", """
+                {"pageNum":1,"pageSize":10}
+                """).path("code").asInt()).isEqualTo(403);
+    }
+
     /** 登录并返回 token。 */
     private String loginToken(String path, String body) throws Exception {
         MvcResult result = mockMvc.perform(post(path)
@@ -284,6 +336,15 @@ class RoleMenuApiTest {
                 """.formatted(roleCode, roleName));
         assertThat(response.path("code").asInt()).isZero();
         return response.path("data").asString();
+    }
+
+    /** 将 JSON 字符串数组转换为 List。 */
+    private List<String> texts(JsonNode array) {
+        List<String> values = new ArrayList<>();
+        for (int i = 0; i < array.size(); i++) {
+            values.add(array.get(i).asString());
+        }
+        return values;
     }
 
     /** 递归查找菜单节点。 */

@@ -19,7 +19,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Schema(description = "租户分页参数")
-public class SysTenantPageParam extends PageParam {
+public class PlatformTenantPageParam extends PageParam {
 
     /** 租户编码，精确匹配；为空不过滤 */
     @Size(max = 32, message = "租户编码长度不能超过 32")

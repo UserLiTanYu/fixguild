@@ -16,7 +16,7 @@ import java.util.List;
  */
 @Data
 @Schema(description = "角色菜单分配参数")
-public class SysRoleMenusParam {
+public class TenantRoleMenusParam {
 
     /** 角色业务 ID */
     @NotBlank(message = "角色 ID 不能为空")

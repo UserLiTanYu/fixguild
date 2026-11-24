@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @Schema(description = "租户信息")
-public class SysTenantVO implements Serializable {
+public class PlatformTenantVO implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;

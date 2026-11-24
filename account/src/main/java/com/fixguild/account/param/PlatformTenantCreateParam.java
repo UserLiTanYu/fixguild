@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @Schema(description = "新增租户参数")
-public class SysTenantCreateParam {
+public class PlatformTenantCreateParam {
 
     /** 租户编码，平台内唯一，最长 32 */
     @NotBlank(message = "租户编码不能为空")

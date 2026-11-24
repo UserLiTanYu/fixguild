@@ -9,12 +9,12 @@ import com.fixguild.account.entity.SysRoleMenuEntity;
 import com.fixguild.account.mapper.SysMenuMapper;
 import com.fixguild.account.mapper.SysRoleMapper;
 import com.fixguild.account.mapper.SysRoleMenuMapper;
-import com.fixguild.account.param.SysRoleCreateParam;
-import com.fixguild.account.param.SysRoleMenusParam;
-import com.fixguild.account.param.SysRolePageParam;
-import com.fixguild.account.param.SysRoleUpdateParam;
+import com.fixguild.account.param.TenantRoleCreateParam;
+import com.fixguild.account.param.TenantRoleMenusParam;
+import com.fixguild.account.param.TenantRolePageParam;
+import com.fixguild.account.param.TenantRoleUpdateParam;
 import com.fixguild.account.service.tenant.TenantRoleService;
-import com.fixguild.account.vo.SysRoleVO;
+import com.fixguild.account.vo.TenantRoleVO;
 import com.fixguild.common.auth.LoginContext;
 import com.fixguild.common.domain.PageResult;
 import com.fixguild.common.enums.ClientCode;
@@ -60,7 +60,7 @@ public class TenantRoleServiceImpl implements TenantRoleService {
 
     /** {@inheritDoc} */
     @Override
-    public PageResult<SysRoleVO> page(SysRolePageParam param) {
+    public PageResult<TenantRoleVO> page(TenantRolePageParam param) {
         String tenantId = currentTenantId();
         QueryWrapper query = QueryWrapper.create()
                 .eq(SysRoleEntity::getTenantId, tenantId)
@@ -79,7 +79,7 @@ public class TenantRoleServiceImpl implements TenantRoleService {
     /** {@inheritDoc} */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String create(SysRoleCreateParam param) {
+    public String create(TenantRoleCreateParam param) {
         String tenantId = currentTenantId();
         String roleCode = StrUtil.trim(param.getRoleCode());
         long exists = sysRoleMapper.selectCountByQuery(QueryWrapper.create()
@@ -116,7 +116,7 @@ public class TenantRoleServiceImpl implements TenantRoleService {
     /** {@inheritDoc} */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void update(SysRoleUpdateParam param) {
+    public void update(TenantRoleUpdateParam param) {
         String tenantId = currentTenantId();
         SysRoleEntity role = getByUid(param.getUid(), tenantId);
         if (Integer.valueOf(1).equals(role.getIsSystem())) {
@@ -146,7 +146,7 @@ public class TenantRoleServiceImpl implements TenantRoleService {
     /** {@inheritDoc} */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void bindMenus(SysRoleMenusParam param) {
+    public void bindMenus(TenantRoleMenusParam param) {
         String tenantId = currentTenantId();
         SysRoleEntity role = getByUid(param.getUid(), tenantId);
         if (Integer.valueOf(1).equals(role.getIsSystem())) {
@@ -242,8 +242,8 @@ public class TenantRoleServiceImpl implements TenantRoleService {
      * @param entity 角色实体
      * @return 角色 VO
      */
-    private SysRoleVO toVO(SysRoleEntity entity) {
-        SysRoleVO vo = new SysRoleVO();
+    private TenantRoleVO toVO(SysRoleEntity entity) {
+        TenantRoleVO vo = new TenantRoleVO();
         BeanUtil.copyProperties(entity, vo);
         return vo;
     }

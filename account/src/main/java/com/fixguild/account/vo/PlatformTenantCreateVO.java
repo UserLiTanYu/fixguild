@@ -14,7 +14,7 @@ import lombok.Data;
  */
 @Data
 @Schema(description = "新增租户结果")
-public class SysTenantCreateVO {
+public class PlatformTenantCreateVO {
 
     /** 租户业务 ID。 */
     @Schema(description = "租户业务 ID")

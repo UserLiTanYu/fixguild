@@ -1,14 +1,14 @@
 package com.fixguild.account.controller.platform;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
-import com.fixguild.account.param.SysTenantCreateParam;
-import com.fixguild.account.param.SysTenantPageParam;
-import com.fixguild.account.param.SysTenantStatusParam;
-import com.fixguild.account.param.SysTenantUidParam;
-import com.fixguild.account.param.SysTenantUpdateParam;
+import com.fixguild.account.param.PlatformTenantCreateParam;
+import com.fixguild.account.param.PlatformTenantPageParam;
+import com.fixguild.account.param.PlatformTenantStatusParam;
+import com.fixguild.account.param.PlatformTenantUidParam;
+import com.fixguild.account.param.PlatformTenantUpdateParam;
 import com.fixguild.account.service.platform.PlatformTenantService;
-import com.fixguild.account.vo.SysTenantCreateVO;
-import com.fixguild.account.vo.SysTenantVO;
+import com.fixguild.account.vo.PlatformTenantCreateVO;
+import com.fixguild.account.vo.PlatformTenantVO;
 import com.fixguild.common.domain.CommonResponse;
 import com.fixguild.common.domain.PageResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,7 +47,7 @@ public class PlatformTenantController {
     @PostMapping("/page")
     @Operation(summary = "租户分页")
     @SaCheckPermission("platform:tenant:page")
-    public CommonResponse<PageResult<SysTenantVO>> page(@Valid @RequestBody SysTenantPageParam param) {
+    public CommonResponse<PageResult<PlatformTenantVO>> page(@Valid @RequestBody PlatformTenantPageParam param) {
         return CommonResponse.ok(platformTenantService.page(param));
     }
 
@@ -60,7 +60,7 @@ public class PlatformTenantController {
     @PostMapping("/create")
     @Operation(summary = "新增租户", description = "同步创建租户端初始管理员，初始密码仅返回一次")
     @SaCheckPermission("platform:tenant:create")
-    public CommonResponse<SysTenantCreateVO> create(@Valid @RequestBody SysTenantCreateParam param) {
+    public CommonResponse<PlatformTenantCreateVO> create(@Valid @RequestBody PlatformTenantCreateParam param) {
         return CommonResponse.ok(platformTenantService.create(param));
     }
 
@@ -73,7 +73,7 @@ public class PlatformTenantController {
     @PostMapping("/update")
     @Operation(summary = "编辑租户")
     @SaCheckPermission("platform:tenant:update")
-    public CommonResponse<Void> update(@Valid @RequestBody SysTenantUpdateParam param) {
+    public CommonResponse<Void> update(@Valid @RequestBody PlatformTenantUpdateParam param) {
         platformTenantService.update(param);
         return CommonResponse.ok();
     }
@@ -87,7 +87,7 @@ public class PlatformTenantController {
     @PostMapping("/detail")
     @Operation(summary = "租户详情")
     @SaCheckPermission("platform:tenant:detail")
-    public CommonResponse<SysTenantVO> detail(@Valid @RequestBody SysTenantUidParam param) {
+    public CommonResponse<PlatformTenantVO> detail(@Valid @RequestBody PlatformTenantUidParam param) {
         return CommonResponse.ok(platformTenantService.detail(param.getUid()));
     }
 
@@ -100,7 +100,7 @@ public class PlatformTenantController {
     @PostMapping("/status")
     @Operation(summary = "启停租户")
     @SaCheckPermission("platform:tenant:status")
-    public CommonResponse<Void> status(@Valid @RequestBody SysTenantStatusParam param) {
+    public CommonResponse<Void> status(@Valid @RequestBody PlatformTenantStatusParam param) {
         platformTenantService.changeStatus(param.getUid(), param.getStatus());
         return CommonResponse.ok();
     }

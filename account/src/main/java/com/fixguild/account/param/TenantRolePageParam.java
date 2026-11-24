@@ -17,7 +17,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Schema(description = "角色分页参数")
-public class SysRolePageParam extends PageParam {
+public class TenantRolePageParam extends PageParam {
 
     /** 角色编码，精确匹配；为空不过滤 */
     @Size(max = 64, message = "角色编码长度不能超过 64")

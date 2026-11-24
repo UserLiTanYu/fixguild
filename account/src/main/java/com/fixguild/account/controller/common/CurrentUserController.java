@@ -1,7 +1,7 @@
 package com.fixguild.account.controller.common;
 
 import cn.dev33.satoken.stp.StpUtil;
-import com.fixguild.account.param.PasswordChangeParam;
+import com.fixguild.account.param.CurrentUserPasswordChangeParam;
 import com.fixguild.account.service.auth.AuthService;
 import com.fixguild.account.service.common.CurrentUserService;
 import com.fixguild.account.vo.UserAuthVO;
@@ -92,7 +92,7 @@ public class CurrentUserController {
     @PostMapping("/{client}/password/change")
     @Operation(summary = "修改密码", description = "校验旧密码，修改成功后退出当前登录")
     public CommonResponse<Void> changePassword(@PathVariable String client,
-                                               @Valid @RequestBody PasswordChangeParam param) {
+                                               @Valid @RequestBody CurrentUserPasswordChangeParam param) {
         LoginUser loginUser = currentLogin(client);
         currentUserService.changePassword(loginUser, param);
         StpUtil.logout();

@@ -1,6 +1,6 @@
 package com.fixguild.account.service.common;
 
-import com.fixguild.account.param.PasswordChangeParam;
+import com.fixguild.account.param.CurrentUserPasswordChangeParam;
 import com.fixguild.common.auth.LoginUser;
 import com.fixguild.common.exception.BusinessException;
 
@@ -21,5 +21,5 @@ public interface CurrentUserService {
      * @param param     修改密码参数
      * @throws BusinessException 用户不存在或停用时抛出 401，旧密码错误时抛出 400
      */
-    void changePassword(LoginUser loginUser, PasswordChangeParam param);
+    void changePassword(LoginUser loginUser, CurrentUserPasswordChangeParam param);
 }

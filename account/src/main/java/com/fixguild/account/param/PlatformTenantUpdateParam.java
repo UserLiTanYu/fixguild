@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Schema(description = "编辑租户参数")
-public class SysTenantUpdateParam extends SysTenantUidParam {
+public class PlatformTenantUpdateParam extends PlatformTenantUidParam {
 
     /** 租户名称；为 null 表示不修改 */
     @Size(max = 128, message = "租户名称长度不能超过 128")

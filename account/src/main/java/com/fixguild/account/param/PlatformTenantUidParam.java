@@ -15,7 +15,7 @@ import lombok.Data;
  */
 @Data
 @Schema(description = "租户ID参数")
-public class SysTenantUidParam {
+public class PlatformTenantUidParam {
 
     /** 租户业务 ID，最长 32 */
     @NotBlank(message = "uid 不能为空")

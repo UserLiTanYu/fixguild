@@ -13,7 +13,7 @@ import lombok.Data;
  */
 @Data
 @Schema(description = "修改密码参数")
-public class PasswordChangeParam {
+public class CurrentUserPasswordChangeParam {
 
     /** 旧密码。 */
     @NotBlank(message = "旧密码不能为空")

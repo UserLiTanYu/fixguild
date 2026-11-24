@@ -5,7 +5,7 @@ import cn.hutool.crypto.digest.BCrypt;
 import com.fixguild.account.entity.SysUserEntity;
 import com.fixguild.account.support.AccountCredentialGenerator;
 import com.fixguild.account.mapper.SysUserMapper;
-import com.fixguild.account.param.PasswordChangeParam;
+import com.fixguild.account.param.CurrentUserPasswordChangeParam;
 import com.fixguild.account.security.LoginAttemptGuard;
 import com.fixguild.account.service.common.CurrentUserService;
 import com.fixguild.common.auth.LoginUser;
@@ -38,7 +38,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     /** {@inheritDoc} */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void changePassword(LoginUser loginUser, PasswordChangeParam param) {
+    public void changePassword(LoginUser loginUser, CurrentUserPasswordChangeParam param) {
         SysUserEntity user = sysUserMapper.selectOneByQuery(QueryWrapper.create()
                 .eq(SysUserEntity::getUserCode, loginUser.userCode())
                 .eq(SysUserEntity::getTenantId, loginUser.tenantId())

@@ -9,13 +9,13 @@ import com.fixguild.account.entity.SysTenantEntity;
 import com.fixguild.account.entity.SysUserEntity;
 import com.fixguild.account.mapper.SysTenantMapper;
 import com.fixguild.account.mapper.SysUserMapper;
-import com.fixguild.account.param.SysTenantCreateParam;
-import com.fixguild.account.param.SysTenantPageParam;
-import com.fixguild.account.param.SysTenantUpdateParam;
+import com.fixguild.account.param.PlatformTenantCreateParam;
+import com.fixguild.account.param.PlatformTenantPageParam;
+import com.fixguild.account.param.PlatformTenantUpdateParam;
 import com.fixguild.account.service.platform.PlatformTenantService;
 import com.fixguild.account.service.tenant.TenantProvisionService;
-import com.fixguild.account.vo.SysTenantCreateVO;
-import com.fixguild.account.vo.SysTenantVO;
+import com.fixguild.account.vo.PlatformTenantCreateVO;
+import com.fixguild.account.vo.PlatformTenantVO;
 import com.fixguild.common.annotation.IgnoreTenant;
 import com.fixguild.common.domain.PageResult;
 import com.fixguild.common.enums.ClientCode;
@@ -55,7 +55,7 @@ public class PlatformTenantServiceImpl implements PlatformTenantService {
 
     /** {@inheritDoc} */
     @Override
-    public PageResult<SysTenantVO> page(SysTenantPageParam param) {
+    public PageResult<PlatformTenantVO> page(PlatformTenantPageParam param) {
         QueryWrapper query = QueryWrapper.create()
                 .eq(SysTenantEntity::getStatus, param.getStatus(), param.getStatus() != null)
                 .like(SysTenantEntity::getTenantName, param.getTenantName(), StrUtil.isNotBlank(param.getTenantName()))
@@ -70,7 +70,7 @@ public class PlatformTenantServiceImpl implements PlatformTenantService {
 
     /** {@inheritDoc} */
     @Override
-    public SysTenantVO detail(String uid) {
+    public PlatformTenantVO detail(String uid) {
         return toVO(getByUid(uid));
     }
 
@@ -78,7 +78,7 @@ public class PlatformTenantServiceImpl implements PlatformTenantService {
     @Override
     @IgnoreTenant
     @Transactional(rollbackFor = Exception.class)
-    public SysTenantCreateVO create(SysTenantCreateParam param) {
+    public PlatformTenantCreateVO create(PlatformTenantCreateParam param) {
         // 先查重给出友好提示；数据库唯一索引仍是并发场景的最终兜底
         long exists = sysTenantMapper.selectCountByQuery(
                 QueryWrapper.create().eq(SysTenantEntity::getTenantCode, param.getTenantCode()));
@@ -125,7 +125,7 @@ public class PlatformTenantServiceImpl implements PlatformTenantService {
     /** {@inheritDoc} */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void update(SysTenantUpdateParam param) {
+    public void update(PlatformTenantUpdateParam param) {
         SysTenantEntity existing = getByUid(param.getUid());
         if (param.getTenantName() != null && StrUtil.isBlank(param.getTenantName())) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "租户名称不能为空");
@@ -190,7 +190,7 @@ public class PlatformTenantServiceImpl implements PlatformTenantService {
      * @param initialPassword 初始密码明文
      * @return 待插入的管理员实体
      */
-    private SysUserEntity buildInitialAdmin(SysTenantCreateParam param, String tenantCode, String initialPassword) {
+    private SysUserEntity buildInitialAdmin(PlatformTenantCreateParam param, String tenantCode, String initialPassword) {
         SysUserEntity admin = new SysUserEntity();
         admin.setUid(IdUtil.fastSimpleUUID());
         admin.setTenantId(tenantCode);
@@ -212,8 +212,8 @@ public class PlatformTenantServiceImpl implements PlatformTenantService {
      * @param initialPassword 初始密码明文
      * @return 创建结果
      */
-    private SysTenantCreateVO toCreateVO(SysTenantEntity tenant, SysUserEntity admin, String initialPassword) {
-        SysTenantCreateVO vo = new SysTenantCreateVO();
+    private PlatformTenantCreateVO toCreateVO(SysTenantEntity tenant, SysUserEntity admin, String initialPassword) {
+        PlatformTenantCreateVO vo = new PlatformTenantCreateVO();
         vo.setUid(tenant.getUid());
         vo.setTenantCode(tenant.getTenantCode());
         vo.setAdminUsername(admin.getUsername());
@@ -228,8 +228,8 @@ public class PlatformTenantServiceImpl implements PlatformTenantService {
      * @param entity 租户实体
      * @return 租户 VO
      */
-    private SysTenantVO toVO(SysTenantEntity entity) {
-        SysTenantVO vo = new SysTenantVO();
+    private PlatformTenantVO toVO(SysTenantEntity entity) {
+        PlatformTenantVO vo = new PlatformTenantVO();
         BeanUtil.copyProperties(entity, vo);
         // 手机号在 VO 边界脱敏，避免 Entity 或明文直接出接口
         if (StrUtil.isNotBlank(entity.getContactMobile())) {

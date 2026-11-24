@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @Schema(description = "角色信息")
-public class SysRoleVO implements Serializable {
+public class TenantRoleVO implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;

@@ -18,7 +18,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Schema(description = "租户状态参数")
-public class SysTenantStatusParam extends SysTenantUidParam {
+public class PlatformTenantStatusParam extends PlatformTenantUidParam {
 
     /** 状态：1 启用，0 停用 */
     @NotNull(message = "状态不能为空")

@@ -1,10 +1,10 @@
 package com.fixguild.account.service.platform;
 
-import com.fixguild.account.param.SysTenantCreateParam;
-import com.fixguild.account.param.SysTenantPageParam;
-import com.fixguild.account.param.SysTenantUpdateParam;
-import com.fixguild.account.vo.SysTenantCreateVO;
-import com.fixguild.account.vo.SysTenantVO;
+import com.fixguild.account.param.PlatformTenantCreateParam;
+import com.fixguild.account.param.PlatformTenantPageParam;
+import com.fixguild.account.param.PlatformTenantUpdateParam;
+import com.fixguild.account.vo.PlatformTenantCreateVO;
+import com.fixguild.account.vo.PlatformTenantVO;
 import com.fixguild.common.domain.PageResult;
 import com.fixguild.common.exception.BusinessException;
 
@@ -27,7 +27,7 @@ public interface PlatformTenantService {
      * @param param 分页与筛选参数
      * @return 租户分页结果
      */
-    PageResult<SysTenantVO> page(SysTenantPageParam param);
+    PageResult<PlatformTenantVO> page(PlatformTenantPageParam param);
 
     /**
      * 查询租户详情。
@@ -36,7 +36,7 @@ public interface PlatformTenantService {
      * @return 租户详情，手机号已脱敏
      * @throws BusinessException uid 为空抛出 400，租户不存在抛出 404
      */
-    SysTenantVO detail(String uid);
+    PlatformTenantVO detail(String uid);
 
     /**
      * 新增租户，并同步创建租户端初始管理员。
@@ -48,7 +48,7 @@ public interface PlatformTenantService {
      * @return 租户业务 ID、初始管理员账号和一次性初始密码
      * @throws BusinessException 租户编码重复时抛出 409
      */
-    SysTenantCreateVO create(SysTenantCreateParam param);
+    PlatformTenantCreateVO create(PlatformTenantCreateParam param);
 
     /**
      * 编辑租户。
@@ -58,7 +58,7 @@ public interface PlatformTenantService {
      * @param param 编辑参数
      * @throws BusinessException uid 为空抛出 400，租户不存在抛出 404
      */
-    void update(SysTenantUpdateParam param);
+    void update(PlatformTenantUpdateParam param);
 
     /**
      * 启用或停用租户。

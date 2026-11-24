@@ -1,10 +1,10 @@
 package com.fixguild.account.service.tenant;
 
-import com.fixguild.account.param.SysRoleCreateParam;
-import com.fixguild.account.param.SysRoleMenusParam;
-import com.fixguild.account.param.SysRolePageParam;
-import com.fixguild.account.param.SysRoleUpdateParam;
-import com.fixguild.account.vo.SysRoleVO;
+import com.fixguild.account.param.TenantRoleCreateParam;
+import com.fixguild.account.param.TenantRoleMenusParam;
+import com.fixguild.account.param.TenantRolePageParam;
+import com.fixguild.account.param.TenantRoleUpdateParam;
+import com.fixguild.account.vo.TenantRoleVO;
 import com.fixguild.common.domain.PageResult;
 import com.fixguild.common.exception.BusinessException;
 
@@ -24,7 +24,7 @@ public interface TenantRoleService {
      * @param param 分页与筛选参数
      * @return 角色分页结果
      */
-    PageResult<SysRoleVO> page(SysRolePageParam param);
+    PageResult<TenantRoleVO> page(TenantRolePageParam param);
 
     /**
      * 新增自定义角色。
@@ -33,7 +33,7 @@ public interface TenantRoleService {
      * @return 角色业务 ID
      * @throws BusinessException 角色编码重复时抛出 409
      */
-    String create(SysRoleCreateParam param);
+    String create(TenantRoleCreateParam param);
 
     /**
      * 编辑自定义角色。
@@ -43,7 +43,7 @@ public interface TenantRoleService {
      * @param param 编辑参数
      * @throws BusinessException 角色不存在抛出 404，系统角色或没有可更新字段抛出 400
      */
-    void update(SysRoleUpdateParam param);
+    void update(TenantRoleUpdateParam param);
 
     /**
      * 重新分配角色菜单。
@@ -53,5 +53,5 @@ public interface TenantRoleService {
      * @param param 角色菜单参数
      * @throws BusinessException 角色不存在抛出 404，系统角色或菜单无效抛出 400
      */
-    void bindMenus(SysRoleMenusParam param);
+    void bindMenus(TenantRoleMenusParam param);
 }

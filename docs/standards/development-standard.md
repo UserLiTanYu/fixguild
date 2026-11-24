@@ -226,7 +226,7 @@ com.fixguild.common
 | 新增入参 | `XxxCreateParam` | `CustomerCreateParam` |
 | 修改入参 | `XxxUpdateParam` | `CustomerUpdateParam` |
 | 通用入参 | `XxxParam` | 仅在多个操作字段完全一致时使用 |
-| 出参 | `XxxVO` | `SysTenantVO` |
+| 出参 | `XxxVO` | `PlatformTenantVO` |
 | 内部传输 | `XxxDTO` | `WorkOrderEventDTO` |
 | 枚举 | `XxxStatus` / `XxxType` | `WorkOrderStatus` |
 | 常量 | `XxxConstants` | `WorkOrderConstants` |
@@ -361,13 +361,13 @@ public class PlatformTenantController {
 
     @PostMapping("/page")
     @Operation(summary = "租户分页")
-    public CommonResponse<PageResult<SysTenantVO>> page(@Valid @RequestBody SysTenantPageParam param) {
+    public CommonResponse<PageResult<PlatformTenantVO>> page(@Valid @RequestBody PlatformTenantPageParam param) {
         return CommonResponse.ok(platformTenantService.page(param));
     }
 
     @PostMapping("/create")
     @Operation(summary = "新增租户")
-    public CommonResponse<String> create(@Valid @RequestBody SysTenantCreateParam param) {
+    public CommonResponse<String> create(@Valid @RequestBody PlatformTenantCreateParam param) {
         return CommonResponse.ok(platformTenantService.create(param));
     }
 }
@@ -395,13 +395,13 @@ public class PlatformTenantController {
 ```java
 public interface PlatformTenantService {
 
-    PageResult<SysTenantVO> page(SysTenantPageParam param);
+    PageResult<PlatformTenantVO> page(PlatformTenantPageParam param);
 
-    SysTenantVO detail(String uid);
+    PlatformTenantVO detail(String uid);
 
-    String create(SysTenantCreateParam param);
+    String create(PlatformTenantCreateParam param);
 
-    void update(SysTenantUpdateParam param);
+    void update(PlatformTenantUpdateParam param);
 
     void changeStatus(String uid, Integer status);
 }
@@ -417,7 +417,7 @@ public class PlatformTenantServiceImpl implements PlatformTenantService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String create(SysTenantCreateParam param) {
+    public String create(PlatformTenantCreateParam param) {
         // 1. 业务校验
         // 2. 唯一性校验
         // 3. 组装并插入
@@ -510,7 +510,7 @@ public class WorkOrderEntity extends TenantEntity {
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Schema(description = "租户分页参数")
-public class SysTenantPageParam extends PageParam {
+public class PlatformTenantPageParam extends PageParam {
 
     @Schema(description = "租户名称")
     private String tenantName;
@@ -523,7 +523,7 @@ public class SysTenantPageParam extends PageParam {
 ```java
 @Data
 @Schema(description = "新增租户参数")
-public class SysTenantCreateParam {
+public class PlatformTenantCreateParam {
 
     @NotBlank(message = "租户编码不能为空")
     @Size(max = 32, message = "租户编码长度不能超过 32")
@@ -554,7 +554,7 @@ public class SysTenantCreateParam {
 ```java
 @Data
 @Schema(description = "租户信息")
-public class SysTenantVO implements Serializable {
+public class PlatformTenantVO implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -740,7 +740,7 @@ public interface PlatformTenantService {
      * @return 租户业务 ID
      * @throws BusinessException 租户编码重复时抛出 409
      */
-    String create(SysTenantCreateParam param);
+    String create(PlatformTenantCreateParam param);
 }
 ```
 
@@ -833,7 +833,7 @@ update.setTenantName(param.getTenantName());
 ```java
 @PostMapping("/create")
 @Operation(summary = "新增租户")
-public CommonResponse<String> create(@Valid @RequestBody SysTenantCreateParam param) {
+public CommonResponse<String> create(@Valid @RequestBody PlatformTenantCreateParam param) {
     return CommonResponse.ok(sysTenantService.create(param));
 }
 ```

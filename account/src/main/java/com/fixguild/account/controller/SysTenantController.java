@@ -1,5 +1,6 @@
 package com.fixguild.account.controller;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.fixguild.account.param.SysTenantCreateParam;
 import com.fixguild.account.param.SysTenantPageParam;
 import com.fixguild.account.param.SysTenantStatusParam;
@@ -22,8 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 平台端租户管理接口。
  *
- * <p>租户表为平台全局表，不参与租户数据隔离；M2 接入 Sa-Token 后补
- * {@code @SaCheckPermission} 权限校验。</p>
+ * <p>租户表为平台全局表，不参与租户数据隔离；接口统一使用
+ * {@code @SaCheckPermission} 校验平台端权限。</p>
  *
  * @author litanyu
  * @since 2026-11-19
@@ -45,6 +46,7 @@ public class SysTenantController {
      */
     @PostMapping("/page")
     @Operation(summary = "租户分页")
+    @SaCheckPermission("platform:tenant:page")
     public CommonResponse<PageResult<SysTenantVO>> page(@Valid @RequestBody SysTenantPageParam param) {
         return CommonResponse.ok(sysTenantService.page(param));
     }
@@ -57,6 +59,7 @@ public class SysTenantController {
      */
     @PostMapping("/create")
     @Operation(summary = "新增租户", description = "同步创建租户端初始管理员，初始密码仅返回一次")
+    @SaCheckPermission("platform:tenant:create")
     public CommonResponse<SysTenantCreateVO> create(@Valid @RequestBody SysTenantCreateParam param) {
         return CommonResponse.ok(sysTenantService.create(param));
     }
@@ -69,6 +72,7 @@ public class SysTenantController {
      */
     @PostMapping("/update")
     @Operation(summary = "编辑租户")
+    @SaCheckPermission("platform:tenant:update")
     public CommonResponse<Void> update(@Valid @RequestBody SysTenantUpdateParam param) {
         sysTenantService.update(param);
         return CommonResponse.ok();
@@ -82,6 +86,7 @@ public class SysTenantController {
      */
     @PostMapping("/detail")
     @Operation(summary = "租户详情")
+    @SaCheckPermission("platform:tenant:detail")
     public CommonResponse<SysTenantVO> detail(@Valid @RequestBody SysTenantUidParam param) {
         return CommonResponse.ok(sysTenantService.detail(param.getUid()));
     }
@@ -94,6 +99,7 @@ public class SysTenantController {
      */
     @PostMapping("/status")
     @Operation(summary = "启停租户")
+    @SaCheckPermission("platform:tenant:status")
     public CommonResponse<Void> status(@Valid @RequestBody SysTenantStatusParam param) {
         sysTenantService.changeStatus(param.getUid(), param.getStatus());
         return CommonResponse.ok();

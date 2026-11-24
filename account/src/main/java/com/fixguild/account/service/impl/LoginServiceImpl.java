@@ -13,6 +13,7 @@ import com.fixguild.account.mapper.SysLoginLogMapper;
 import com.fixguild.account.mapper.SysTenantMapper;
 import com.fixguild.account.mapper.SysUserMapper;
 import com.fixguild.account.param.PlatformLoginParam;
+import com.fixguild.account.param.TechnicianLoginParam;
 import com.fixguild.account.param.TenantLoginParam;
 import com.fixguild.account.security.LoginAttemptGuard;
 import com.fixguild.account.service.LoginService;
@@ -65,8 +66,28 @@ public class LoginServiceImpl implements LoginService {
     /** {@inheritDoc} */
     @Override
     public LoginVO loginTenant(TenantLoginParam param) {
+        SysTenantEntity tenant = requireActiveTenant(param.getTenantCode());
+        return doLogin(ClientCode.TENANT, tenant.getTenantCode(),
+                param.getUsername(), param.getPassword());
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public LoginVO loginTechnician(TechnicianLoginParam param) {
+        SysTenantEntity tenant = requireActiveTenant(param.getTenantCode());
+        return doLogin(ClientCode.TECHNICIAN, tenant.getTenantCode(),
+                param.getUsername(), param.getPassword());
+    }
+
+    /**
+     * 校验租户存在、启用且未过期。
+     *
+     * @param tenantCode 租户编码
+     * @return 租户实体
+     */
+    private SysTenantEntity requireActiveTenant(String tenantCode) {
         SysTenantEntity tenant = sysTenantMapper.selectOneByQuery(QueryWrapper.create()
-                .eq(SysTenantEntity::getTenantCode, param.getTenantCode()));
+                .eq(SysTenantEntity::getTenantCode, tenantCode));
         if (tenant == null) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED, "租户不存在");
         }
@@ -76,8 +97,7 @@ public class LoginServiceImpl implements LoginService {
         if (tenant.getExpireTime() != null && tenant.getExpireTime().isBefore(LocalDateTime.now())) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED, "租户已过期");
         }
-        return doLogin(ClientCode.TENANT, tenant.getTenantCode(),
-                param.getUsername(), param.getPassword());
+        return tenant;
     }
 
     /** 执行登录校验、锁定检查和登录态写入。 */

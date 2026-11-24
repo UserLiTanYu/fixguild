@@ -64,6 +64,8 @@ class TenantUserApiTest {
                 .contains(roleUid(tenantAdminToken, "tenant_admin"));
         assertThat(texts(record.path("roleNames"))).contains("租户管理员");
         assertThat(record.path("status").asInt()).isEqualTo(1);
+        // 技师账号不属于租户用户管理范围
+        assertThat(userPage(tenantAdminToken, "technician").path("records").size()).isZero();
     }
 
     /** 创建用户后应能使用初始密码登录，并获得绑定角色权限。 */

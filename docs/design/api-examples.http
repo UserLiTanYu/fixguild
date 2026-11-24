@@ -1,8 +1,8 @@
 ### ============================================================
 ### 多租户维保工单系统 · 核心接口示例
 ### 适用于 IntelliJ HTTP Client / VS Code REST Client
-### 说明：健康检查、登录、租户 CRUD、当前用户/权限菜单、退出、修改密码、
-###       租户端菜单树、角色管理和用户管理可直接调用；工单、技师等接口是后续里程碑的设计示例。
+### 说明：健康检查、三端登录、租户 CRUD、当前用户/权限菜单、退出、修改密码、
+###       租户端菜单树、角色管理和用户管理可直接调用；工单等接口是后续里程碑的设计示例。
 ### ============================================================
 
 @baseUrl = http://localhost:8090
@@ -49,15 +49,25 @@ Content-Type: application/json
   "password": "{{newAdminPassword}}"
 }
 
-### 技师登录（短信验证码，开发环境固定 123456）
+### 技师登录
 POST {{baseUrl}}/account/api/technician/login
 Content-Type: application/json
 
 {
   "tenantCode": "{{tenantCode}}",
-  "mobile": "13800000000",
-  "smsCode": "123456"
+  "username": "technician",
+  "password": "admin123"
 }
+
+### 技师端-当前用户
+POST {{baseUrl}}/account/api/technician/user/info
+satoken: {{techToken}}
+client-code: technician
+
+### 技师端-权限菜单
+POST {{baseUrl}}/account/api/technician/user/auth
+satoken: {{techToken}}
+client-code: technician
 
 ### 当前用户信息
 POST {{baseUrl}}/account/api/tenant/user/info

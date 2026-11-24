@@ -17,7 +17,11 @@ VALUES (1, 'USER0001', '0', 'platform', 'U0001', 'admin',
        (5, 'USER1003', 'T0001', 'tenant', 'U1003', 'tenant_user',
         '$2a$10$BG4QRox2wAnZ0aQ3jmYWQ.eTv5bmnkYjJNjcjiITC1MuSXwQ5jrFm', '租户普通用户', NULL, 1, 'system', 'system'),
        (6, 'USER2002', 'T0002', 'tenant', 'U2002', 'tenant_user',
-        '$2a$10$BG4QRox2wAnZ0aQ3jmYWQ.eTv5bmnkYjJNjcjiITC1MuSXwQ5jrFm', '第二租户普通用户', NULL, 1, 'system', 'system');
+        '$2a$10$BG4QRox2wAnZ0aQ3jmYWQ.eTv5bmnkYjJNjcjiITC1MuSXwQ5jrFm', '第二租户普通用户', NULL, 1, 'system', 'system'),
+       (7, 'USER1004', 'T0001', 'technician', 'U1004', 'technician',
+        '$2a$10$BG4QRox2wAnZ0aQ3jmYWQ.eTv5bmnkYjJNjcjiITC1MuSXwQ5jrFm', '演示技师', NULL, 1, 'system', 'system'),
+       (8, 'USER2004', 'T0002', 'technician', 'U2004', 'technician',
+        '$2a$10$BG4QRox2wAnZ0aQ3jmYWQ.eTv5bmnkYjJNjcjiITC1MuSXwQ5jrFm', '第二租户技师', NULL, 1, 'system', 'system');
 
 INSERT INTO sys_menu (id, uid, client_code, parent_id, menu_name, menu_type, path, component, perms, icon, sort, visible, status, is_system, create_by, update_by)
 VALUES (1, 'MENU0001', 'platform', 0, '租户管理', 'M', '/platform/tenant', NULL, NULL, 'team', 10, 1, 1, 1, 'system', 'system'),
@@ -60,7 +64,9 @@ VALUES ('0', 1, 1, 'system'),
        ('T0002', 3, 4, 'system'),
        ('T0001', 4, 3, 'system'),
        ('T0001', 5, 3, 'system'),
-       ('T0002', 6, 5, 'system');
+       ('T0002', 6, 5, 'system'),
+       ('T0001', 7, 6, 'system'),
+       ('T0002', 8, 7, 'system');
 
 INSERT INTO sys_role_menu (tenant_id, role_id, menu_id, create_by)
 VALUES ('0', 1, 1, 'system'),

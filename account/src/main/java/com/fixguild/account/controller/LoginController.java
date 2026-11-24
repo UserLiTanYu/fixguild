@@ -1,6 +1,7 @@
 package com.fixguild.account.controller;
 
 import com.fixguild.account.param.PlatformLoginParam;
+import com.fixguild.account.param.TechnicianLoginParam;
 import com.fixguild.account.param.TenantLoginParam;
 import com.fixguild.account.service.LoginService;
 import com.fixguild.account.vo.LoginVO;
@@ -51,5 +52,17 @@ public class LoginController {
     @Operation(summary = "租户端登录")
     public CommonResponse<LoginVO> tenantLogin(@Valid @RequestBody TenantLoginParam param) {
         return CommonResponse.ok(loginService.loginTenant(param));
+    }
+
+    /**
+     * 技师端登录。
+     *
+     * @param param 请求参数
+     * @return 统一响应
+     */
+    @PostMapping("/technician/login")
+    @Operation(summary = "技师端登录")
+    public CommonResponse<LoginVO> technicianLogin(@Valid @RequestBody TechnicianLoginParam param) {
+        return CommonResponse.ok(loginService.loginTechnician(param));
     }
 }

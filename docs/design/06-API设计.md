@@ -124,6 +124,8 @@
 | 通知已读 | `POST /tenant/api/notification/read` | `tenant:notification:read` |
 | 配置列表 | `POST /tenant/api/config/list` | `tenant:config:list` |
 
+> 租户端角色只管理自定义角色，系统内置角色只读；菜单树包含按钮节点，供角色分配菜单使用。
+
 ## 7.5 技师端接口
 
 | 功能 | 路径 | 权限 |

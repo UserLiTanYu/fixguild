@@ -13,6 +13,7 @@ import com.fixguild.account.mapper.SysRoleMenuMapper;
 import com.fixguild.account.mapper.SysUserMapper;
 import com.fixguild.account.mapper.SysUserRoleMapper;
 import com.fixguild.account.service.AuthService;
+import com.fixguild.account.support.MenuTreeBuilder;
 import com.fixguild.account.vo.MenuTreeVO;
 import com.fixguild.account.vo.UserAuthVO;
 import com.fixguild.account.vo.UserInfoVO;
@@ -23,11 +24,8 @@ import com.mybatisflex.core.query.QueryWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -44,9 +42,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
-
-    /** 按钮菜单类型，按钮只进入权限串，不进入菜单树。 */
-    private static final String MENU_TYPE_BUTTON = "F";
 
     /** 空权限快照，避免重复创建空集合。 */
     private static final AuthSnapshot EMPTY = new AuthSnapshot(List.of(), List.of(), List.of());
@@ -194,48 +189,7 @@ public class AuthServiceImpl implements AuthService {
                 .filter(StrUtil::isNotBlank)
                 .distinct()
                 .toList();
-        return new AuthSnapshot(roleCodes, permissions, buildMenuTree(menus));
-    }
-
-    /**
-     * 将菜单列表组装成树；按钮节点不进入树。
-     *
-     * @param menus 当前用户拥有的菜单
-     * @return 根菜单列表
-     */
-    private List<MenuTreeVO> buildMenuTree(List<SysMenuEntity> menus) {
-        Map<Long, MenuTreeVO> nodeById = new LinkedHashMap<>();
-        for (SysMenuEntity menu : menus) {
-            if (MENU_TYPE_BUTTON.equals(menu.getMenuType())) {
-                continue;
-            }
-            MenuTreeVO node = new MenuTreeVO();
-            node.setUid(menu.getUid());
-            node.setMenuName(menu.getMenuName());
-            node.setMenuType(menu.getMenuType());
-            node.setPath(menu.getPath());
-            node.setComponent(menu.getComponent());
-            node.setPerms(menu.getPerms());
-            node.setIcon(menu.getIcon());
-            node.setSort(menu.getSort());
-            nodeById.put(menu.getId(), node);
-        }
-
-        List<MenuTreeVO> roots = new ArrayList<>();
-        for (SysMenuEntity menu : menus) {
-            MenuTreeVO node = nodeById.get(menu.getId());
-            if (node == null) {
-                continue;
-            }
-            MenuTreeVO parent = menu.getParentId() == null ? null : nodeById.get(menu.getParentId());
-            node.setParentUid(parent == null ? null : parent.getUid());
-            if (parent == null) {
-                roots.add(node);
-            } else {
-                parent.getChildren().add(node);
-            }
-        }
-        return roots;
+        return new AuthSnapshot(roleCodes, permissions, MenuTreeBuilder.build(menus, false));
     }
 
     /**

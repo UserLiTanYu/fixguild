@@ -1,8 +1,8 @@
 ### ============================================================
 ### 多租户维保工单系统 · 核心接口示例
 ### 适用于 IntelliJ HTTP Client / VS Code REST Client
-### 说明：健康检查、登录、租户 CRUD、当前用户/权限菜单、退出、修改密码可直接调用；
-###       工单、技师等接口是后续里程碑的设计示例。
+### 说明：健康检查、登录、租户 CRUD、当前用户/权限菜单、退出、修改密码、
+###       租户端菜单树与角色管理可直接调用；工单、技师等接口是后续里程碑的设计示例。
 ### ============================================================
 
 @baseUrl = http://localhost:8090
@@ -83,6 +83,45 @@ Content-Type: application/json
 {
   "oldPassword": "{{oldPassword}}",
   "newPassword": "{{newPassword}}"
+}
+
+### 租户端-菜单树（包含按钮节点，供角色分配菜单）
+POST {{baseUrl}}/tenant/api/menu/tree
+satoken: {{tenantToken}}
+client-code: tenant
+
+### 租户端-角色分页
+POST {{baseUrl}}/tenant/api/role/page
+satoken: {{tenantToken}}
+client-code: tenant
+Content-Type: application/json
+
+{
+  "pageNum": 1,
+  "pageSize": 20
+}
+
+### 租户端-新增角色
+POST {{baseUrl}}/tenant/api/role/create
+satoken: {{tenantToken}}
+client-code: tenant
+Content-Type: application/json
+
+{
+  "roleCode": "dispatcher",
+  "roleName": "调度员",
+  "dataScope": 2
+}
+
+### 租户端-分配角色菜单（uid 换成角色新增返回的值）
+POST {{baseUrl}}/tenant/api/role/menus
+satoken: {{tenantToken}}
+client-code: tenant
+Content-Type: application/json
+
+{
+  "uid": "替换为角色 uid",
+  "menuUids": ["MENU0010", "MENU0011", "MENU0012"]
 }
 
 ### 平台端-租户分页

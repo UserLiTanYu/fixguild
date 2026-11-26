@@ -51,12 +51,13 @@ CREATE TABLE sys_user (
     update_by VARCHAR(64),
     create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    is_delete TINYINT NOT NULL DEFAULT 0
+    is_delete TINYINT NOT NULL DEFAULT 0,
+    delete_seq BIGINT NOT NULL DEFAULT 0
 );
 
 CREATE UNIQUE INDEX uk_sys_user_uid ON sys_user (uid);
 CREATE UNIQUE INDEX uk_sys_user_code ON sys_user (user_code);
-CREATE UNIQUE INDEX uk_sys_user_tenant_client_username ON sys_user (tenant_id, client_code, username);
+CREATE UNIQUE INDEX uk_sys_user_tenant_client_username ON sys_user (tenant_id, client_code, username, delete_seq);
 CREATE INDEX idx_sys_user_tenant_client_status ON sys_user (tenant_id, client_code, status);
 
 CREATE TABLE sys_role (
@@ -74,11 +75,12 @@ CREATE TABLE sys_role (
     update_by VARCHAR(64),
     create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    is_delete TINYINT NOT NULL DEFAULT 0
+    is_delete TINYINT NOT NULL DEFAULT 0,
+    delete_seq BIGINT NOT NULL DEFAULT 0
 );
 
 CREATE UNIQUE INDEX uk_sys_role_uid ON sys_role (uid);
-CREATE UNIQUE INDEX uk_sys_role_tenant_client_code ON sys_role (tenant_id, client_code, role_code);
+CREATE UNIQUE INDEX uk_sys_role_tenant_client_code ON sys_role (tenant_id, client_code, role_code, delete_seq);
 CREATE INDEX idx_sys_role_tenant_client_status ON sys_role (tenant_id, client_code, status);
 
 CREATE TABLE sys_menu (

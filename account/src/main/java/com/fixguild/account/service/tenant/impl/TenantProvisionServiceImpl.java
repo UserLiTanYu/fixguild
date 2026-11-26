@@ -12,6 +12,7 @@ import com.fixguild.account.mapper.SysRoleMapper;
 import com.fixguild.account.mapper.SysRoleMenuMapper;
 import com.fixguild.account.mapper.SysUserRoleMapper;
 import com.fixguild.account.service.tenant.TenantProvisionService;
+import com.fixguild.account.support.RoleCodes;
 import com.fixguild.common.annotation.IgnoreTenant;
 import com.fixguild.common.auth.LoginContext;
 import com.fixguild.common.enums.ClientCode;
@@ -40,9 +41,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class TenantProvisionServiceImpl implements TenantProvisionService {
-
-    /** 租户管理员角色编码。 */
-    private static final String TENANT_ADMIN_ROLE_CODE = "tenant_admin";
 
     /** 角色表 Mapper。 */
     private final SysRoleMapper sysRoleMapper;
@@ -81,7 +79,7 @@ public class TenantProvisionServiceImpl implements TenantProvisionService {
         role.setUid(IdUtil.fastSimpleUUID());
         role.setTenantId(tenantId);
         role.setClientCode(ClientCode.TENANT.getCode());
-        role.setRoleCode(TENANT_ADMIN_ROLE_CODE);
+        role.setRoleCode(RoleCodes.TENANT_ADMIN);
         role.setRoleName("租户管理员");
         role.setDataScope(2);
         role.setStatus(1);

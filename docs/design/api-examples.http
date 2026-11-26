@@ -134,6 +134,16 @@ Content-Type: application/json
   "menuUids": ["MENU0010", "MENU0011", "MENU0012"]
 }
 
+### 租户端-删除角色（逻辑删除，编码可复用；系统角色或已分配用户的角色不可删）
+POST {{baseUrl}}/tenant/api/role/delete
+satoken: {{tenantToken}}
+client-code: tenant
+Content-Type: application/json
+
+{
+  "uid": "替换为角色 uid"
+}
+
 ### 租户端-用户分页
 POST {{baseUrl}}/tenant/api/user/page
 satoken: {{tenantToken}}
@@ -189,6 +199,16 @@ Content-Type: application/json
 {
   "uid": "替换为用户 uid",
   "status": 0
+}
+
+### 租户端-删除用户（逻辑删除，登录名可复用；删除后目标用户登录态失效）
+POST {{baseUrl}}/tenant/api/user/delete
+satoken: {{tenantToken}}
+client-code: tenant
+Content-Type: application/json
+
+{
+  "uid": "替换为用户 uid"
 }
 
 ### 平台端-租户分页

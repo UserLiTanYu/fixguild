@@ -90,10 +90,12 @@
 | 用户编辑 | `POST /tenant/api/user/update` | `tenant:user:update` |
 | 重置密码 | `POST /tenant/api/user/reset-password` | `tenant:user:reset` |
 | 用户启停 | `POST /tenant/api/user/status` | `tenant:user:status` |
+| 用户删除 | `POST /tenant/api/user/delete` | `tenant:user:delete` |
 | 角色分页 | `POST /tenant/api/role/page` | `tenant:role:page` |
 | 角色新增 | `POST /tenant/api/role/create` | `tenant:role:create` |
 | 角色编辑 | `POST /tenant/api/role/update` | `tenant:role:update` |
 | 角色分配菜单 | `POST /tenant/api/role/menus` | `tenant:role:menus` |
+| 角色删除 | `POST /tenant/api/role/delete` | `tenant:role:delete` |
 | 菜单树 | `POST /tenant/api/menu/tree` | `tenant:menu:tree` |
 | 技师分页 | `POST /tenant/api/technician/page` | `tenant:technician:page` |
 | 技师新增 | `POST /tenant/api/technician/create` | `tenant:technician:create` |

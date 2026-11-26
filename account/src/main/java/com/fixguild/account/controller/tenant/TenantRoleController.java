@@ -5,6 +5,7 @@ import com.fixguild.account.param.TenantRoleCreateParam;
 import com.fixguild.account.param.TenantRoleMenusParam;
 import com.fixguild.account.param.TenantRolePageParam;
 import com.fixguild.account.param.TenantRoleUpdateParam;
+import com.fixguild.account.param.TenantUidParam;
 import com.fixguild.account.service.tenant.TenantRoleService;
 import com.fixguild.account.vo.TenantRoleVO;
 import com.fixguild.common.domain.CommonResponse;
@@ -84,6 +85,20 @@ public class TenantRoleController {
     @SaCheckPermission("tenant:role:menus")
     public CommonResponse<Void> menus(@Valid @RequestBody TenantRoleMenusParam param) {
         tenantRoleService.bindMenus(param);
+        return CommonResponse.ok();
+    }
+
+    /**
+     * 逻辑删除自定义角色。
+     *
+     * @param param 角色业务 ID 参数
+     * @return 统一响应
+     */
+    @PostMapping("/delete")
+    @Operation(summary = "删除角色", description = "逻辑删除，角色编码可复用；系统角色或已分配用户的角色不可删除")
+    @SaCheckPermission("tenant:role:delete")
+    public CommonResponse<Void> delete(@Valid @RequestBody TenantUidParam param) {
+        tenantRoleService.delete(param);
         return CommonResponse.ok();
     }
 }

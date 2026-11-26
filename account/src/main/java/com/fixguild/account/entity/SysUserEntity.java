@@ -82,4 +82,9 @@ public class SysUserEntity extends TenantEntity {
      * 最后登录 IP。
      */
     private String lastLoginIp;
+
+    /**
+     * 删除序号：0 未删除；删除时置为自身 id，用于释放唯一编码。
+     */
+    private Long deleteSeq = 0L;
 }

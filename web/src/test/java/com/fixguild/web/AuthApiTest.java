@@ -90,7 +90,8 @@ class AuthApiTest {
         assertThat(auth.path("code").asInt()).isZero();
         assertThat(texts(auth.path("data").path("roles"))).contains("tenant_admin");
         assertThat(texts(auth.path("data").path("permissions")))
-                .contains("tenant:user:create", "tenant:role:menus");
+                .contains("tenant:user:create", "tenant:role:menus",
+                        "tenant:user:delete", "tenant:role:delete");
         assertThat(containsMenu(auth.path("data").path("menus"), "系统管理")).isTrue();
         assertThat(containsMenu(auth.path("data").path("menus"), "用户管理")).isTrue();
     }
@@ -111,7 +112,8 @@ class AuthApiTest {
         assertThat(texts(auth.path("data").path("roles"))).contains("tenant_user");
         assertThat(texts(auth.path("data").path("permissions"))).contains("tenant:user:page");
         assertThat(texts(auth.path("data").path("permissions")))
-                .doesNotContain("tenant:user:create", "tenant:role:page");
+                .doesNotContain("tenant:user:create", "tenant:role:page",
+                        "tenant:user:delete", "tenant:role:delete");
     }
 
     /** 新开通租户的初始管理员应自动获得租户权限。 */
@@ -139,7 +141,8 @@ class AuthApiTest {
         JsonNode auth = postJson("/account/api/tenant/user/auth", token, "tenant", null);
         assertThat(auth.path("code").asInt()).isZero();
         assertThat(texts(auth.path("data").path("roles"))).contains("tenant_admin");
-        assertThat(texts(auth.path("data").path("permissions"))).contains("tenant:user:create");
+        assertThat(texts(auth.path("data").path("permissions")))
+                .contains("tenant:user:create", "tenant:user:delete", "tenant:role:delete");
         assertThat(containsMenu(auth.path("data").path("menus"), "系统管理")).isTrue();
     }
 

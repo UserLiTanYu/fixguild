@@ -6,13 +6,16 @@ import cn.hutool.core.util.StrUtil;
 import com.fixguild.account.entity.SysMenuEntity;
 import com.fixguild.account.entity.SysRoleEntity;
 import com.fixguild.account.entity.SysRoleMenuEntity;
+import com.fixguild.account.entity.SysUserRoleEntity;
 import com.fixguild.account.mapper.SysMenuMapper;
 import com.fixguild.account.mapper.SysRoleMapper;
 import com.fixguild.account.mapper.SysRoleMenuMapper;
+import com.fixguild.account.mapper.SysUserRoleMapper;
 import com.fixguild.account.param.TenantRoleCreateParam;
 import com.fixguild.account.param.TenantRoleMenusParam;
 import com.fixguild.account.param.TenantRolePageParam;
 import com.fixguild.account.param.TenantRoleUpdateParam;
+import com.fixguild.account.param.TenantUidParam;
 import com.fixguild.account.service.tenant.TenantRoleService;
 import com.fixguild.account.vo.TenantRoleVO;
 import com.fixguild.common.auth.LoginContext;
@@ -57,6 +60,9 @@ public class TenantRoleServiceImpl implements TenantRoleService {
 
     /** 角色菜单 Mapper。 */
     private final SysRoleMenuMapper sysRoleMenuMapper;
+
+    /** 用户角色 Mapper。 */
+    private final SysUserRoleMapper sysUserRoleMapper;
 
     /** {@inheritDoc} */
     @Override
@@ -188,6 +194,36 @@ public class TenantRoleServiceImpl implements TenantRoleService {
         }
         log.info("分配角色菜单成功: tenantId={}, roleUid={}, menuCount={}",
                 tenantId, role.getUid(), menus.size());
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void delete(TenantUidParam param) {
+        String tenantId = TenantContext.requireTenantId();
+        SysRoleEntity role = getByUid(param.getUid(), tenantId);
+        if (Integer.valueOf(1).equals(role.getIsSystem())) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "系统内置角色不允许删除");
+        }
+        long assigned = sysUserRoleMapper.selectCountByQuery(QueryWrapper.create()
+                .eq(SysUserRoleEntity::getTenantId, tenantId)
+                .eq(SysUserRoleEntity::getRoleId, role.getId()));
+        if (assigned > 0) {
+            throw new BusinessException(ErrorCode.CONFLICT, "角色已分配给用户，请先解除绑定");
+        }
+
+        sysRoleMenuMapper.deleteByQuery(QueryWrapper.create()
+                .eq(SysRoleMenuEntity::getTenantId, tenantId)
+                .eq(SysRoleMenuEntity::getRoleId, role.getId()));
+
+        SysRoleEntity update = new SysRoleEntity();
+        update.setId(role.getId());
+        update.setDeleteSeq(role.getId());
+        sysRoleMapper.update(update, true);
+        sysRoleMapper.deleteById(role.getId());
+
+        log.info("删除租户角色成功: tenantId={}, roleCode={}, uid={}",
+                tenantId, role.getRoleCode(), role.getUid());
     }
 
     /**

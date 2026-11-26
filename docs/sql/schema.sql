@@ -66,10 +66,11 @@ CREATE TABLE IF NOT EXISTS `sys_user` (
     `create_time`   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time`   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `is_delete`     TINYINT         NOT NULL DEFAULT 0 COMMENT '逻辑删除：0否 1是',
+    `delete_seq`    BIGINT          NOT NULL DEFAULT 0 COMMENT '删除序号：0未删除，删除时置为id以释放唯一编码',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_uid` (`uid`),
     UNIQUE KEY `uk_user_code` (`user_code`),
-    UNIQUE KEY `uk_tenant_client_username` (`tenant_id`, `client_code`, `username`),
+    UNIQUE KEY `uk_tenant_client_username` (`tenant_id`, `client_code`, `username`, `delete_seq`),
     KEY `idx_tenant_client_status` (`tenant_id`, `client_code`, `status`),
     KEY `idx_mobile_hash` (`mobile_hash`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户';
@@ -93,9 +94,10 @@ CREATE TABLE IF NOT EXISTS `sys_role` (
     `create_time`   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time`   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `is_delete`     TINYINT         NOT NULL DEFAULT 0 COMMENT '逻辑删除：0否 1是',
+    `delete_seq`    BIGINT          NOT NULL DEFAULT 0 COMMENT '删除序号：0未删除，删除时置为id以释放唯一编码',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_uid` (`uid`),
-    UNIQUE KEY `uk_tenant_client_role` (`tenant_id`, `client_code`, `role_code`),
+    UNIQUE KEY `uk_tenant_client_role` (`tenant_id`, `client_code`, `role_code`, `delete_seq`),
     KEY `idx_tenant_client_status` (`tenant_id`, `client_code`, `status`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '角色';
 

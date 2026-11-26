@@ -4,6 +4,7 @@ import com.fixguild.account.param.TenantRoleCreateParam;
 import com.fixguild.account.param.TenantRoleMenusParam;
 import com.fixguild.account.param.TenantRolePageParam;
 import com.fixguild.account.param.TenantRoleUpdateParam;
+import com.fixguild.account.param.TenantUidParam;
 import com.fixguild.account.vo.TenantRoleVO;
 import com.fixguild.common.domain.PageResult;
 import com.fixguild.common.exception.BusinessException;
@@ -54,4 +55,14 @@ public interface TenantRoleService {
      * @throws BusinessException 角色不存在抛出 404，系统角色或菜单无效抛出 400
      */
     void bindMenus(TenantRoleMenusParam param);
+
+    /**
+     * 逻辑删除租户自定义角色，角色编码可复用。
+     *
+     * <p>系统内置角色不允许删除；角色已分配给用户时不允许删除。</p>
+     *
+     * @param param 角色业务 ID 参数
+     * @throws BusinessException 角色不存在抛出 404，系统角色或已分配用户抛出 400/409
+     */
+    void delete(TenantUidParam param);
 }

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -38,6 +39,10 @@ class TenantUserApiTest {
     /** JSON 序列化工具。 */
     @Autowired
     private ObjectMapper objectMapper;
+
+    /** JDBC 查询工具，用于校验逻辑删除字段。 */
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     /** T0001 租户管理员 token。 */
     private String tenantAdminToken;
@@ -125,6 +130,55 @@ class TenantUserApiTest {
                 {"uid":"%s"}
                 """.formatted(uid));
         assertThat(noFields.path("code").asInt()).isEqualTo(400);
+    }
+
+    /** 删除用户应逻辑删除并允许复用登录名。 */
+    @Test
+    void deleteUserShouldKeepRowAndAllowUsernameReuse() throws Exception {
+        String tenantUserRoleUid = roleUid(tenantAdminToken, "tenant_user");
+        String username = "delete_" + System.currentTimeMillis();
+        JsonNode create = createUser(tenantAdminToken, username, "待删除用户", tenantUserRoleUid);
+        String uid = create.path("data").path("uid").asString();
+        String initialPassword = create.path("data").path("initialPassword").asString();
+        Long userId = jdbcTemplate.queryForObject(
+                "SELECT id FROM sys_user WHERE uid = ?", Long.class, uid);
+
+        JsonNode delete = postJson("/tenant/api/user/delete", tenantAdminToken, "tenant", """
+                {"uid":"%s"}
+                """.formatted(uid));
+        assertThat(delete.path("code").asInt()).isZero();
+
+        assertThat(userPage(tenantAdminToken, username).path("records").size()).isZero();
+        Integer isDelete = jdbcTemplate.queryForObject(
+                "SELECT is_delete FROM sys_user WHERE id = ?", Integer.class, userId);
+        Long deleteSeq = jdbcTemplate.queryForObject(
+                "SELECT delete_seq FROM sys_user WHERE id = ?", Long.class, userId);
+        assertThat(isDelete).isEqualTo(1);
+        assertThat(deleteSeq).isEqualTo(userId);
+
+        assertThat(postLogin("/account/api/tenant/login", """
+                {"tenantCode":"T0001","username":"%s","password":"%s"}
+                """.formatted(username, initialPassword)).path("code").asInt()).isEqualTo(401);
+
+        JsonNode recreate = createUser(tenantAdminToken, username, "复用登录名", tenantUserRoleUid);
+        assertThat(recreate.path("code").asInt()).isZero();
+        assertThat(recreate.path("data").path("uid").asString()).isNotEqualTo(uid);
+
+        JsonNode deleteAgain = postJson("/tenant/api/user/delete", tenantAdminToken, "tenant", """
+                {"uid":"%s"}
+                """.formatted(uid));
+        assertThat(deleteAgain.path("code").asInt()).isEqualTo(404);
+    }
+
+    /** 不能删除当前登录账号。 */
+    @Test
+    void deleteSelfShouldFail() throws Exception {
+        String adminUid = findUserUid(userPage(tenantAdminToken, "tenant_admin"), "tenant_admin");
+        JsonNode delete = postJson("/tenant/api/user/delete", tenantAdminToken, "tenant", """
+                {"uid":"%s"}
+                """.formatted(adminUid));
+        assertThat(delete.path("code").asInt()).isEqualTo(400);
+        assertThat(delete.path("msg").asString()).contains("不能删除当前登录账号");
     }
 
     /** 重置密码、停用用户应让目标用户登录态立即失效。 */
@@ -230,6 +284,9 @@ class TenantUserApiTest {
         assertThat(postJson("/tenant/api/user/status", userToken, "tenant", """
                 {"uid":"x","status":0}
                 """).path("code").asInt()).isEqualTo(403);
+        assertThat(postJson("/tenant/api/user/delete", userToken, "tenant", """
+                {"uid":"x"}
+                """).path("code").asInt()).isEqualTo(403);
     }
 
     /** 用户管理必须按租户隔离。 */
@@ -252,6 +309,9 @@ class TenantUserApiTest {
                 {"uid":"%s","nickname":"越权"}
                 """.formatted(uid)).path("code").asInt()).isEqualTo(404);
         assertThat(postJson("/tenant/api/user/reset-password", t2AdminToken, "tenant", """
+                {"uid":"%s"}
+                """.formatted(uid)).path("code").asInt()).isEqualTo(404);
+        assertThat(postJson("/tenant/api/user/delete", t2AdminToken, "tenant", """
                 {"uid":"%s"}
                 """.formatted(uid)).path("code").asInt()).isEqualTo(404);
         JsonNode invalidRole = postJson("/tenant/api/user/create", t2AdminToken, "tenant", """

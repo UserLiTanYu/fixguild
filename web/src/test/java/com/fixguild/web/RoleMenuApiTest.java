@@ -224,6 +224,11 @@ class RoleMenuApiTest {
                 """.formatted(t1RoleUid));
         assertThat(crossTenantBind.path("code").asInt()).isEqualTo(404);
 
+        JsonNode crossTenantDelete = postJson("/tenant/api/role/delete", t2AdminToken, "tenant", """
+                {"uid":"%s"}
+                """.formatted(t1RoleUid));
+        assertThat(crossTenantDelete.path("code").asInt()).isEqualTo(404);
+
         JsonNode sameCodeInT2 = postJson("/tenant/api/role/create", t2AdminToken, "tenant", """
                 {
                   "roleCode": "%s",
@@ -286,6 +291,124 @@ class RoleMenuApiTest {
         assertThat(postJson("/tenant/api/user/page", userToken, "tenant", """
                 {"pageNum":1,"pageSize":10}
                 """).path("code").asInt()).isEqualTo(403);
+    }
+
+    /** 角色分配给用户时不能删除；解除后可逻辑删除并复用编码。 */
+    @Test
+    void deleteRoleShouldRejectAssignedAndAllowCodeReuse() throws Exception {
+        String roleCode = "delete_role_" + System.currentTimeMillis();
+        String roleUid = createRole(roleCode, "待删除角色");
+        Long roleId = roleId(roleUid);
+        String username = "role_user_" + System.currentTimeMillis();
+
+        JsonNode bind = postJson("/tenant/api/role/menus", tenantAdminToken, "tenant", """
+                {
+                  "uid": "%s",
+                  "menuUids": ["0000000000000000000000000000030a"]
+                }
+                """.formatted(roleUid));
+        assertThat(bind.path("code").asInt()).isZero();
+        assertThat(roleMenuCount(roleId)).isEqualTo(1);
+
+        JsonNode createUser = postJson("/tenant/api/user/create", tenantAdminToken, "tenant", """
+                {
+                  "username": "%s",
+                  "nickname": "角色删除测试用户",
+                  "roleUids": ["%s"]
+                }
+                """.formatted(username, roleUid));
+        assertThat(createUser.path("code").asInt()).isZero();
+        String userUid = createUser.path("data").path("uid").asString();
+
+        JsonNode assigned = postJson("/tenant/api/role/delete", tenantAdminToken, "tenant", """
+                {"uid":"%s"}
+                """.formatted(roleUid));
+        assertThat(assigned.path("code").asInt()).isEqualTo(409);
+
+        String tenantUserRoleUid = findRoleUid(rolePage(tenantAdminToken, "tenant_user"), "tenant_user");
+        JsonNode unbind = postJson("/tenant/api/user/update", tenantAdminToken, "tenant", """
+                {
+                  "uid": "%s",
+                  "roleUids": ["%s"]
+                }
+                """.formatted(userUid, tenantUserRoleUid));
+        assertThat(unbind.path("code").asInt()).isZero();
+
+        JsonNode delete = postJson("/tenant/api/role/delete", tenantAdminToken, "tenant", """
+                {"uid":"%s"}
+                """.formatted(roleUid));
+        assertThat(delete.path("code").asInt()).isZero();
+        assertThat(rolePage(tenantAdminToken, roleCode).path("records").size()).isZero();
+        assertThat(roleMenuCount(roleId)).isZero();
+
+        Integer isDelete = jdbcTemplate.queryForObject(
+                "SELECT is_delete FROM sys_role WHERE id = ?", Integer.class, roleId);
+        Long deleteSeq = jdbcTemplate.queryForObject(
+                "SELECT delete_seq FROM sys_role WHERE id = ?", Long.class, roleId);
+        assertThat(isDelete).isEqualTo(1);
+        assertThat(deleteSeq).isEqualTo(roleId);
+
+        JsonNode recreate = postJson("/tenant/api/role/create", tenantAdminToken, "tenant", """
+                {
+                  "roleCode": "%s",
+                  "roleName": "复用角色编码",
+                  "dataScope": 2
+                }
+                """.formatted(roleCode));
+        assertThat(recreate.path("code").asInt()).isZero();
+    }
+
+    /** 系统内置角色不允许删除。 */
+    @Test
+    void deleteSystemRoleShouldFail() throws Exception {
+        String systemRoleUid = findRoleUid(rolePage(tenantAdminToken, "tenant_admin"), "tenant_admin");
+        JsonNode delete = postJson("/tenant/api/role/delete", tenantAdminToken, "tenant", """
+                {"uid":"%s"}
+                """.formatted(systemRoleUid));
+        assertThat(delete.path("code").asInt()).isEqualTo(400);
+    }
+
+    /** 有删除权限的普通用户也不能删除最后一个租户管理员。 */
+    @Test
+    void lastTenantAdminShouldNotBeDeleted() throws Exception {
+        String roleCode = "user_manager_" + System.currentTimeMillis();
+        String roleUid = createRole(roleCode, "用户管理员");
+        JsonNode bind = postJson("/tenant/api/role/menus", tenantAdminToken, "tenant", """
+                {
+                  "uid": "%s",
+                  "menuUids": ["00000000000000000000000000000311"]
+                }
+                """.formatted(roleUid));
+        assertThat(bind.path("code").asInt()).isZero();
+
+        String username = "user_manager_" + System.currentTimeMillis();
+        JsonNode createUser = postJson("/tenant/api/user/create", tenantAdminToken, "tenant", """
+                {
+                  "username": "%s",
+                  "nickname": "用户管理员",
+                  "roleUids": ["%s"]
+                }
+                """.formatted(username, roleUid));
+        assertThat(createUser.path("code").asInt()).isZero();
+        String password = createUser.path("data").path("initialPassword").asString();
+        String managerToken = loginToken("/account/api/tenant/login", """
+                {
+                  "tenantCode": "T0001",
+                  "username": "%s",
+                  "password": "%s"
+                }
+                """.formatted(username, password));
+
+        JsonNode userPage = postJson("/tenant/api/user/page", tenantAdminToken, "tenant", """
+                {"pageNum":1,"pageSize":20,"username":"tenant_admin"}
+                """);
+        String adminUid = userPage.path("data").path("records").get(0).path("uid").asString();
+
+        JsonNode delete = postJson("/tenant/api/user/delete", managerToken, "tenant", """
+                {"uid":"%s"}
+                """.formatted(adminUid));
+        assertThat(delete.path("code").asInt()).isEqualTo(400);
+        assertThat(delete.path("msg").asString()).contains("不能删除最后一个租户管理员");
     }
 
     /** 登录并返回 token。 */

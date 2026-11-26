@@ -1183,6 +1183,7 @@ KEY `idx_tenant_expect` (`tenant_id`, `expect_time`, `status`)
 - 查询默认由 MyBatis-Flex 自动追加 `is_delete = 0`；**禁止**手写 `is_delete = 0` 条件（除非使用原生 SQL）。
 - 删除**必须**用 `mapper.deleteById(...)` 触发逻辑删除，**禁止**手写 `UPDATE ... SET is_delete = 1`。
 - 唯一索引与逻辑删除的冲突（删除后无法复用编码）**必须**在建表时明确：能复用就调整唯一键策略，不能复用就在注释中说明。
+- 需要删除后复用唯一编码时，增加 `delete_seq BIGINT NOT NULL DEFAULT 0`：未删除为 0，删除时置为自身 `id`，并将 `delete_seq` 加入唯一索引。
 
 ### 10.5 关联与冗余
 

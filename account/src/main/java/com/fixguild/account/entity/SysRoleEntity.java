@@ -39,4 +39,7 @@ public class SysRoleEntity extends TenantEntity {
 
     /** 是否系统内置：1 是，0 否。 */
     private Integer isSystem;
+
+    /** 删除序号：0 未删除；删除时置为自身 id，用于释放唯一编码。 */
+    private Long deleteSeq = 0L;
 }

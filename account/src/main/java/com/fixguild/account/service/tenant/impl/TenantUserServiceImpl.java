@@ -17,9 +17,11 @@ import com.fixguild.account.param.TenantUserPageParam;
 import com.fixguild.account.param.TenantUserResetPasswordParam;
 import com.fixguild.account.param.TenantUserStatusParam;
 import com.fixguild.account.param.TenantUserUpdateParam;
+import com.fixguild.account.param.TenantUidParam;
 import com.fixguild.account.security.LoginAttemptGuard;
 import com.fixguild.account.service.tenant.TenantUserService;
 import com.fixguild.account.support.AccountCredentialGenerator;
+import com.fixguild.account.support.RoleCodes;
 import com.fixguild.account.vo.TenantUserCreateVO;
 import com.fixguild.account.vo.TenantUserResetPasswordVO;
 import com.fixguild.account.vo.TenantUserVO;
@@ -207,6 +209,79 @@ public class TenantUserServiceImpl implements TenantUserService {
 
         log.info("变更租户用户状态成功: tenantId={}, username={}, status={}",
                 tenantId, user.getUsername(), param.getStatus());
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void delete(TenantUidParam param) {
+        String tenantId = TenantContext.requireTenantId();
+        SysUserEntity user = getByUid(param.getUid(), tenantId);
+        if (user.getUserCode().equals(LoginContext.getUserCode())) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "不能删除当前登录账号");
+        }
+        checkNotLastTenantAdmin(tenantId, user);
+
+        sysUserRoleMapper.deleteByQuery(QueryWrapper.create()
+                .eq(SysUserRoleEntity::getTenantId, tenantId)
+                .eq(SysUserRoleEntity::getUserId, user.getId()));
+
+        SysUserEntity update = new SysUserEntity();
+        update.setId(user.getId());
+        update.setDeleteSeq(user.getId());
+        sysUserMapper.update(update, true);
+        sysUserMapper.deleteById(user.getId());
+
+        StpUtil.logout(user.getUserCode());
+        log.info("删除租户用户成功: tenantId={}, username={}, uid={}",
+                tenantId, user.getUsername(), user.getUid());
+    }
+
+    /**
+     * 校验不能删除最后一个启用状态的租户管理员。
+     *
+     * @param tenantId 租户编码
+     * @param user     待删除用户
+     */
+    private void checkNotLastTenantAdmin(String tenantId, SysUserEntity user) {
+        if (!Integer.valueOf(1).equals(user.getStatus())) {
+            return;
+        }
+        List<SysUserRoleEntity> userRoles = sysUserRoleMapper.selectListByQuery(QueryWrapper.create()
+                .eq(SysUserRoleEntity::getTenantId, tenantId)
+                .eq(SysUserRoleEntity::getUserId, user.getId()));
+        Set<Long> roleIds = userRoles.stream()
+                .map(SysUserRoleEntity::getRoleId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        if (roleIds.isEmpty()) {
+            return;
+        }
+        SysRoleEntity adminRole = sysRoleMapper.selectOneByQuery(QueryWrapper.create()
+                .eq(SysRoleEntity::getTenantId, tenantId)
+                .eq(SysRoleEntity::getClientCode, ClientCode.TENANT.getCode())
+                .eq(SysRoleEntity::getRoleCode, RoleCodes.TENANT_ADMIN)
+                .in(SysRoleEntity::getId, roleIds));
+        if (adminRole == null) {
+            return;
+        }
+        List<SysUserRoleEntity> otherBindings = sysUserRoleMapper.selectListByQuery(QueryWrapper.create()
+                .eq(SysUserRoleEntity::getTenantId, tenantId)
+                .eq(SysUserRoleEntity::getRoleId, adminRole.getId())
+                .ne(SysUserRoleEntity::getUserId, user.getId()));
+        Set<Long> otherUserIds = otherBindings.stream()
+                .map(SysUserRoleEntity::getUserId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        if (otherUserIds.isEmpty()) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "不能删除最后一个租户管理员");
+        }
+        long activeOtherAdmins = sysUserMapper.selectCountByQuery(QueryWrapper.create()
+                .in(SysUserEntity::getId, otherUserIds)
+                .eq(SysUserEntity::getStatus, 1));
+        if (activeOtherAdmins == 0) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "不能删除最后一个租户管理员");
+        }
     }
 
     /**

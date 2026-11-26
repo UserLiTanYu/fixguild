@@ -151,9 +151,9 @@ class RbacProvisionApiTest {
                 JOIN sys_menu m ON rm.menu_id = m.id
                 WHERE rm.tenant_id = ?
                   AND rm.role_id = ?
-                  AND m.perms = 'tenant:user:create'
+                  AND m.perms IN ('tenant:user:create', 'tenant:user:delete', 'tenant:role:delete')
                 """, Integer.class, tenantCode, roleId);
-        assertThat(permissionCount).isEqualTo(1);
+        assertThat(permissionCount).isEqualTo(3);
     }
 
     /** 构造平台端 POST 请求。 */

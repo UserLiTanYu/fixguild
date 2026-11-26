@@ -6,6 +6,7 @@ import com.fixguild.account.param.TenantUserPageParam;
 import com.fixguild.account.param.TenantUserResetPasswordParam;
 import com.fixguild.account.param.TenantUserStatusParam;
 import com.fixguild.account.param.TenantUserUpdateParam;
+import com.fixguild.account.param.TenantUidParam;
 import com.fixguild.account.service.tenant.TenantUserService;
 import com.fixguild.account.vo.TenantUserCreateVO;
 import com.fixguild.account.vo.TenantUserResetPasswordVO;
@@ -101,6 +102,20 @@ public class TenantUserController {
     @SaCheckPermission("tenant:user:status")
     public CommonResponse<Void> status(@Valid @RequestBody TenantUserStatusParam param) {
         tenantUserService.changeStatus(param);
+        return CommonResponse.ok();
+    }
+
+    /**
+     * 逻辑删除用户。
+     *
+     * @param param 用户业务 ID 参数
+     * @return 统一响应
+     */
+    @PostMapping("/delete")
+    @Operation(summary = "删除用户", description = "逻辑删除，用户名可复用；删除后目标用户登录态立即失效")
+    @SaCheckPermission("tenant:user:delete")
+    public CommonResponse<Void> delete(@Valid @RequestBody TenantUidParam param) {
+        tenantUserService.delete(param);
         return CommonResponse.ok();
     }
 }

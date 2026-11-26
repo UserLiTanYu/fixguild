@@ -5,6 +5,7 @@ import com.fixguild.account.param.TenantUserPageParam;
 import com.fixguild.account.param.TenantUserResetPasswordParam;
 import com.fixguild.account.param.TenantUserStatusParam;
 import com.fixguild.account.param.TenantUserUpdateParam;
+import com.fixguild.account.param.TenantUidParam;
 import com.fixguild.account.vo.TenantUserCreateVO;
 import com.fixguild.account.vo.TenantUserResetPasswordVO;
 import com.fixguild.account.vo.TenantUserVO;
@@ -66,4 +67,15 @@ public interface TenantUserService {
      * @throws BusinessException 用户不存在抛出 404，停用自己时抛出 400
      */
     void changeStatus(TenantUserStatusParam param);
+
+    /**
+     * 逻辑删除租户用户，用户名可复用。
+     *
+     * <p>删除前校验不能删除自己、不能删除最后一个启用的租户管理员；
+     * 删除后目标用户登录态立即失效。</p>
+     *
+     * @param param 用户业务 ID 参数
+     * @throws BusinessException 用户不存在抛出 404，删除自己或最后一个管理员抛出 400
+     */
+    void delete(TenantUidParam param);
 }

@@ -166,7 +166,7 @@ class RoleMenuApiTest {
         JsonNode first = postJson("/tenant/api/role/menus", tenantAdminToken, "tenant", """
                 {
                   "uid": "%s",
-                  "menuUids": ["MENU0010", "MENU0011", "MENU0012"]
+                  "menuUids": ["0000000000000000000000000000030a", "0000000000000000000000000000030b", "0000000000000000000000000000030c"]
                 }
                 """.formatted(roleUid));
         assertThat(first.path("code").asInt()).isZero();
@@ -176,7 +176,7 @@ class RoleMenuApiTest {
         JsonNode second = postJson("/tenant/api/role/menus", tenantAdminToken, "tenant", """
                 {
                   "uid": "%s",
-                  "menuUids": ["MENU0020", "MENU0021"]
+                  "menuUids": ["00000000000000000000000000000314", "00000000000000000000000000000315"]
                 }
                 """.formatted(roleUid));
         assertThat(second.path("code").asInt()).isZero();
@@ -196,7 +196,7 @@ class RoleMenuApiTest {
         JsonNode systemBind = postJson("/tenant/api/role/menus", tenantAdminToken, "tenant", """
                 {
                   "uid": "%s",
-                  "menuUids": ["MENU0010"]
+                  "menuUids": ["0000000000000000000000000000030a"]
                 }
                 """.formatted(systemRoleUid));
         assertThat(systemBind.path("code").asInt()).isEqualTo(400);
@@ -219,7 +219,7 @@ class RoleMenuApiTest {
         JsonNode crossTenantBind = postJson("/tenant/api/role/menus", t2AdminToken, "tenant", """
                 {
                   "uid": "%s",
-                  "menuUids": ["MENU0010"]
+                  "menuUids": ["0000000000000000000000000000030a"]
                 }
                 """.formatted(t1RoleUid));
         assertThat(crossTenantBind.path("code").asInt()).isEqualTo(404);
@@ -269,7 +269,7 @@ class RoleMenuApiTest {
         JsonNode bind = postJson("/tenant/api/role/menus", tenantAdminToken, "tenant", """
                 {
                   "uid": "%s",
-                  "menuUids": ["MENU0010", "MENU0011", "MENU0012"]
+                  "menuUids": ["0000000000000000000000000000030a", "0000000000000000000000000000030b", "0000000000000000000000000000030c"]
                 }
                 """.formatted(roleUid));
         assertThat(bind.path("code").asInt()).isZero();

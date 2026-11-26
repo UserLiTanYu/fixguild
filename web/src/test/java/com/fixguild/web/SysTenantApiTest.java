@@ -30,6 +30,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("local")
 class SysTenantApiTest {
 
+    /** 种子租户 uid，格式与 IdUtil.fastSimpleUUID 一致。 */
+    private static final String SEED_TENANT_UID = "00000000000000000000000000000001";
+
     /** MockMvc 测试客户端。 */
     @Autowired
     private MockMvc mockMvc;
@@ -80,7 +83,7 @@ class SysTenantApiTest {
     /** 种子租户的中文名称应正确返回。 */
     @Test
     void seedTenantShouldKeepChineseText() throws Exception {
-        mockMvc.perform(platformPost("/platform/api/tenant/detail", "{\"uid\":\"TENANT0001\"}"))
+        mockMvc.perform(platformPost("/platform/api/tenant/detail", "{\"uid\":\"" + SEED_TENANT_UID + "\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(0))
                 .andExpect(jsonPath("$.data.tenantName").value("演示维保公司"));
@@ -135,7 +138,7 @@ class SysTenantApiTest {
     /** 状态值非法应返回 400。 */
     @Test
     void shouldReturn400WhenStatusInvalid() throws Exception {
-        mockMvc.perform(platformPost("/platform/api/tenant/status", "{\"uid\":\"TENANT0001\",\"status\":9}"))
+        mockMvc.perform(platformPost("/platform/api/tenant/status", "{\"uid\":\"" + SEED_TENANT_UID + "\",\"status\":9}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(400));
     }

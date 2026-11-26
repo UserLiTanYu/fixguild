@@ -92,7 +92,7 @@ class RbacProvisionApiTest {
                 JOIN sys_user u ON ur.user_id = u.id
                 JOIN sys_role r ON ur.role_id = r.id AND ur.tenant_id = r.tenant_id
                 WHERE ur.tenant_id = 'T0001'
-                  AND u.user_code = 'U1001'
+                  AND u.username = 'tenant_admin'
                   AND r.role_code = 'tenant_admin'
                 """, Integer.class);
         assertThat(count).isEqualTo(1);

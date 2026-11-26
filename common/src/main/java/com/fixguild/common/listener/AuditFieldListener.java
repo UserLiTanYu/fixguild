@@ -67,7 +67,7 @@ public class AuditFieldListener implements InsertListener, UpdateListener {
             // 更新只刷新 updateTime/updateBy，create* 字段不可变
             base.setUpdateTime(LocalDateTime.now());
             if (StrUtil.isBlank(base.getUpdateBy())) {
-                base.setUpdateBy(SYSTEM_USER);
+                base.setUpdateBy(currentUser());
             }
         }
     }

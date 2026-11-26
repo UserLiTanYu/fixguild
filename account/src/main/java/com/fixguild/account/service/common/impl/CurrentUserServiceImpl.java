@@ -1,7 +1,5 @@
 package com.fixguild.account.service.common.impl;
 
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.digest.BCrypt;
 import com.fixguild.account.entity.SysUserEntity;
 import com.fixguild.account.support.AccountCredentialGenerator;
 import com.fixguild.account.mapper.SysUserMapper;
@@ -47,7 +45,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
         if (user == null) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED, "用户不存在或已停用");
         }
-        if (!passwordMatches(param.getOldPassword(), user.getPassword())) {
+        if (!AccountCredentialGenerator.matchesPassword(param.getOldPassword(), user.getPassword())) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "旧密码错误");
         }
 
@@ -63,24 +61,5 @@ public class CurrentUserServiceImpl implements CurrentUserService {
         }
         log.info("修改密码成功: client={}, tenantId={}, userCode={}",
                 loginUser.clientCode(), loginUser.tenantId(), loginUser.userCode());
-    }
-
-    /**
-     * 校验原始密码与 BCrypt 哈希是否匹配。
-     *
-     * @param rawPassword     原始密码
-     * @param encodedPassword BCrypt 哈希
-     * @return 是否匹配
-     */
-    private boolean passwordMatches(String rawPassword, String encodedPassword) {
-        if (StrUtil.isBlank(encodedPassword)) {
-            return false;
-        }
-        try {
-            return BCrypt.checkpw(rawPassword, encodedPassword);
-        } catch (IllegalArgumentException e) {
-            log.warn("密码哈希格式不正确");
-            return false;
-        }
     }
 }

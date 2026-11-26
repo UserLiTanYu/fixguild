@@ -1,5 +1,9 @@
 package com.fixguild.common.tenant;
 
+import cn.hutool.core.util.StrUtil;
+import com.fixguild.common.enums.ErrorCode;
+import com.fixguild.common.exception.BusinessException;
+
 /**
  * 当前线程的租户上下文。
  *
@@ -39,6 +43,20 @@ public final class TenantContext {
      */
     public static String get() {
         return TENANT.get();
+    }
+
+    /**
+     * 获取当前租户编码，缺失时抛出 401。
+     *
+     * @return 租户编码
+     * @throws BusinessException 登录会话缺少租户信息时抛出 401
+     */
+    public static String requireTenantId() {
+        String tenantId = TENANT.get();
+        if (StrUtil.isBlank(tenantId)) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, "登录会话缺少租户信息");
+        }
+        return tenantId;
     }
 
     /**

@@ -5,7 +5,6 @@ import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.dev33.satoken.stp.parameter.SaLoginParameter;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.digest.BCrypt;
 import com.fixguild.account.entity.SysLoginLogEntity;
 import com.fixguild.account.entity.SysTenantEntity;
 import com.fixguild.account.entity.SysUserEntity;
@@ -17,6 +16,7 @@ import com.fixguild.account.param.TechnicianLoginParam;
 import com.fixguild.account.param.TenantLoginParam;
 import com.fixguild.account.security.LoginAttemptGuard;
 import com.fixguild.account.service.auth.LoginService;
+import com.fixguild.account.support.AccountCredentialGenerator;
 import com.fixguild.account.vo.LoginVO;
 import com.fixguild.account.vo.UserInfoVO;
 import com.fixguild.common.auth.AuthConstants;
@@ -115,7 +115,7 @@ public class LoginServiceImpl implements LoginService {
                 .eq(SysUserEntity::getUsername, username));
 
         //用户不存在或者密码错误
-        if (user == null || !passwordMatches(password, user.getPassword())) {
+        if (user == null || !AccountCredentialGenerator.matchesPassword(password, user.getPassword())) {
 
             //失败次数+1
             loginAttemptGuard.recordFailure(clientCode, tenantId, username);
@@ -160,19 +160,6 @@ public class LoginServiceImpl implements LoginService {
 
         SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
         return new LoginVO(tokenInfo.getTokenName(), tokenInfo.getTokenValue(), toUserInfo(user));
-    }
-
-    /** 校验原始密码与密文是否匹配。 */
-    private boolean passwordMatches(String rawPassword, String encodedPassword) {
-        if (StrUtil.isBlank(encodedPassword)) {
-            return false;
-        }
-        try {
-            return BCrypt.checkpw(rawPassword, encodedPassword);
-        } catch (IllegalArgumentException e) {
-            log.warn("密码哈希格式不正确");
-            return false;
-        }
     }
 
     /** 写入登录日志，失败不影响登录主流程。 */

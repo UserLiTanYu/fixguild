@@ -2,7 +2,9 @@ package com.fixguild.account.support;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.BCrypt;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 账号凭据生成工具。
@@ -13,6 +15,7 @@ import cn.hutool.crypto.digest.BCrypt;
  * @author litanyu
  * @since 2026-11-24
  */
+@Slf4j
 public final class AccountCredentialGenerator {
 
     /** 用户编码前缀。 */
@@ -53,5 +56,24 @@ public final class AccountCredentialGenerator {
      */
     public static String hashPassword(String rawPassword) {
         return BCrypt.hashpw(rawPassword, BCrypt.gensalt(BCRYPT_STRENGTH));
+    }
+
+    /**
+     * 校验原始密码与 BCrypt 哈希是否匹配。
+     *
+     * @param rawPassword     原始密码
+     * @param encodedPassword BCrypt 哈希
+     * @return 是否匹配
+     */
+    public static boolean matchesPassword(String rawPassword, String encodedPassword) {
+        if (StrUtil.isBlank(encodedPassword)) {
+            return false;
+        }
+        try {
+            return BCrypt.checkpw(rawPassword, encodedPassword);
+        } catch (IllegalArgumentException e) {
+            log.warn("密码哈希格式不正确");
+            return false;
+        }
     }
 }

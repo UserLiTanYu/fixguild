@@ -61,7 +61,7 @@ public class TenantRoleServiceImpl implements TenantRoleService {
     /** {@inheritDoc} */
     @Override
     public PageResult<TenantRoleVO> page(TenantRolePageParam param) {
-        String tenantId = currentTenantId();
+        String tenantId = TenantContext.requireTenantId();
         QueryWrapper query = QueryWrapper.create()
                 .eq(SysRoleEntity::getTenantId, tenantId)
                 .eq(SysRoleEntity::getClientCode, ClientCode.TENANT.getCode())
@@ -80,7 +80,7 @@ public class TenantRoleServiceImpl implements TenantRoleService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String create(TenantRoleCreateParam param) {
-        String tenantId = currentTenantId();
+        String tenantId = TenantContext.requireTenantId();
         String roleCode = StrUtil.trim(param.getRoleCode());
         long exists = sysRoleMapper.selectCountByQuery(QueryWrapper.create()
                 .eq(SysRoleEntity::getTenantId, tenantId)
@@ -117,7 +117,7 @@ public class TenantRoleServiceImpl implements TenantRoleService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void update(TenantRoleUpdateParam param) {
-        String tenantId = currentTenantId();
+        String tenantId = TenantContext.requireTenantId();
         SysRoleEntity role = getByUid(param.getUid(), tenantId);
         if (Integer.valueOf(1).equals(role.getIsSystem())) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "系统内置角色不允许修改");
@@ -147,7 +147,7 @@ public class TenantRoleServiceImpl implements TenantRoleService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void bindMenus(TenantRoleMenusParam param) {
-        String tenantId = currentTenantId();
+        String tenantId = TenantContext.requireTenantId();
         SysRoleEntity role = getByUid(param.getUid(), tenantId);
         if (Integer.valueOf(1).equals(role.getIsSystem())) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "系统内置角色不允许修改菜单");
@@ -209,20 +209,6 @@ public class TenantRoleServiceImpl implements TenantRoleService {
             throw new BusinessException(ErrorCode.NOT_FOUND, "角色不存在");
         }
         return role;
-    }
-
-    /**
-     * 获取当前租户编码。
-     *
-     * @return 租户编码
-     * @throws BusinessException 登录会话缺少租户信息时抛出 401
-     */
-    private String currentTenantId() {
-        String tenantId = TenantContext.get();
-        if (StrUtil.isBlank(tenantId)) {
-            throw new BusinessException(ErrorCode.UNAUTHORIZED, "登录会话缺少租户信息");
-        }
-        return tenantId;
     }
 
     /**

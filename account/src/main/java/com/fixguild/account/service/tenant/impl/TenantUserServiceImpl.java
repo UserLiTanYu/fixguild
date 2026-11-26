@@ -76,7 +76,7 @@ public class TenantUserServiceImpl implements TenantUserService {
     /** {@inheritDoc} */
     @Override
     public PageResult<TenantUserVO> page(TenantUserPageParam param) {
-        String tenantId = currentTenantId();
+        String tenantId = TenantContext.requireTenantId();
         QueryWrapper query = QueryWrapper.create()
                 .eq(SysUserEntity::getTenantId, tenantId)
                 .eq(SysUserEntity::getClientCode, ClientCode.TENANT.getCode())
@@ -95,7 +95,7 @@ public class TenantUserServiceImpl implements TenantUserService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public TenantUserCreateVO create(TenantUserCreateParam param) {
-        String tenantId = currentTenantId();
+        String tenantId = TenantContext.requireTenantId();
         String username = StrUtil.trim(param.getUsername());
         checkMaxUserCount(tenantId);
         checkUsernameUnique(tenantId, username);
@@ -128,7 +128,7 @@ public class TenantUserServiceImpl implements TenantUserService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void update(TenantUserUpdateParam param) {
-        String tenantId = currentTenantId();
+        String tenantId = TenantContext.requireTenantId();
         SysUserEntity user = getByUid(param.getUid(), tenantId);
         if (param.getNickname() != null && StrUtil.isBlank(param.getNickname())) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "昵称不能为空");
@@ -165,7 +165,7 @@ public class TenantUserServiceImpl implements TenantUserService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public TenantUserResetPasswordVO resetPassword(TenantUserResetPasswordParam param) {
-        String tenantId = currentTenantId();
+        String tenantId = TenantContext.requireTenantId();
         SysUserEntity user = getByUid(param.getUid(), tenantId);
         if (user.getUserCode().equals(LoginContext.getUserCode())) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "请使用修改密码接口重置自己的密码");
@@ -188,7 +188,7 @@ public class TenantUserServiceImpl implements TenantUserService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void changeStatus(TenantUserStatusParam param) {
-        String tenantId = currentTenantId();
+        String tenantId = TenantContext.requireTenantId();
         SysUserEntity user = getByUid(param.getUid(), tenantId);
         if (Integer.valueOf(0).equals(param.getStatus())
                 && user.getUserCode().equals(LoginContext.getUserCode())) {
@@ -354,19 +354,6 @@ public class TenantUserServiceImpl implements TenantUserService {
             throw new BusinessException(ErrorCode.NOT_FOUND, "用户不存在");
         }
         return user;
-    }
-
-    /**
-     * 获取当前租户编码。
-     *
-     * @return 租户编码
-     */
-    private String currentTenantId() {
-        String tenantId = TenantContext.get();
-        if (StrUtil.isBlank(tenantId)) {
-            throw new BusinessException(ErrorCode.UNAUTHORIZED, "登录会话缺少租户信息");
-        }
-        return tenantId;
     }
 
     /**

@@ -181,6 +181,13 @@ class AuthApiTest {
         assertThat(response.path("code").asInt()).isEqualTo(401);
     }
 
+    /** 路径登录端非法应返回 400。 */
+    @Test
+    void invalidClientPathShouldReturn400() throws Exception {
+        JsonNode response = postJson("/account/api/unknown/user/info", platformToken, "platform", null);
+        assertThat(response.path("code").asInt()).isEqualTo(400);
+    }
+
     /** 登录并返回 token。 */
     private String loginToken(String path, String body) throws Exception {
         MvcResult result = mockMvc.perform(post(path)

@@ -14,7 +14,6 @@ import com.fixguild.common.tenant.TenantContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.springframework.web.cors.CorsUtils;
@@ -24,8 +23,10 @@ import org.springframework.web.servlet.HandlerInterceptor;
  * Sa-Token 鉴权拦截器。
  *
  * <p>负责校验登录态、校验登录端、写入租户/登录用户上下文、续期，并在请求结束后清理线程变量。</p>
+ *
+ * @author litanyu
+ * @since 2026-11-23
  */
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class SaTokenAuthInterceptor implements HandlerInterceptor {
@@ -37,8 +38,9 @@ public class SaTokenAuthInterceptor implements HandlerInterceptor {
         // 防御式清理，避免容器线程复用导致上下文串数据
         TenantContext.clear();
         LoginContext.clear();
-
-
+        MDC.remove(AuthConstants.MDC_TENANT_ID);
+        MDC.remove(AuthConstants.MDC_USER_CODE);
+        MDC.remove(AuthConstants.MDC_CLIENT_CODE);
 
         if (CorsUtils.isPreFlightRequest(request)) {
             return true;

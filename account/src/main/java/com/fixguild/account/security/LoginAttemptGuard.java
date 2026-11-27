@@ -11,7 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * 登录失败锁定。
  *
- * <p>M2 使用本地内存；多实例部署时替换为 Redis 的 login:fail:{client}:{username}。</p>
+ * <p>当前使用本地内存，只适合单实例；多实例部署时替换为 Redis，
+ * key 格式为 {@code login:fail:{client}:{tenantId}:{username}}。</p>
  *
  * @author litanyu
  * @since 2026-11-19

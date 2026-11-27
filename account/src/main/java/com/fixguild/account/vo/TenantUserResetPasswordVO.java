@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 /**
  * 重置租户用户密码结果。
  *
@@ -15,7 +18,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "重置租户用户密码结果")
-public class TenantUserResetPasswordVO {
+public class TenantUserResetPasswordVO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /** 用户业务 ID */
     @Schema(description = "用户业务 ID")

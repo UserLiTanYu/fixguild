@@ -3,6 +3,8 @@ package com.fixguild.account.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -13,7 +15,10 @@ import java.util.List;
  */
 @Data
 @Schema(description = "当前用户权限信息")
-public class UserAuthVO {
+public class UserAuthVO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /** 角色编码集合。 */
     @Schema(description = "角色编码集合")

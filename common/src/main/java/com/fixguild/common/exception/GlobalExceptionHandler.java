@@ -46,6 +46,12 @@ public class GlobalExceptionHandler {
         return CommonResponse.fail(e.getCode(), e.getMessage());
     }
 
+    /**
+     * 处理未登录或登录态失效。
+     *
+     * @param e 未登录异常
+     * @return 401 或 501 失败响应
+     */
     @ExceptionHandler(NotLoginException.class)
     public CommonResponse<Void> handleNotLogin(NotLoginException e) {
         log.debug("未登录: type={}", e.getType());
@@ -59,24 +65,41 @@ public class GlobalExceptionHandler {
         return CommonResponse.fail(errorCode);
     }
 
+    /**
+     * 处理无权限访问。
+     *
+     * @param e 无权限异常
+     * @return 403 失败响应
+     */
     @ExceptionHandler(NotPermissionException.class)
     public CommonResponse<Void> handleNotPermission(NotPermissionException e) {
         log.warn("无权限: permission={}", e.getPermission());
         return CommonResponse.fail(ErrorCode.FORBIDDEN);
     }
 
+    /**
+     * 处理无角色访问。
+     *
+     * @param e 无角色异常
+     * @return 403 失败响应
+     */
     @ExceptionHandler(NotRoleException.class)
     public CommonResponse<Void> handleNotRole(NotRoleException e) {
         log.warn("无角色: role={}", e.getRole());
         return CommonResponse.fail(ErrorCode.FORBIDDEN);
     }
 
+    /**
+     * 处理账号被禁用。
+     *
+     * @param e 账号禁用异常
+     * @return 403 失败响应
+     */
     @ExceptionHandler(DisableServiceException.class)
     public CommonResponse<Void> handleDisableService(DisableServiceException e) {
         log.warn("账号被禁用: service={}, level={}", e.getService(), e.getLevel());
         return CommonResponse.fail(ErrorCode.FORBIDDEN, "账号已被禁用");
     }
-
 
     /**
      * 处理 {@code @RequestBody} 参数校验失败，拼接字段错误信息。

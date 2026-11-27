@@ -3,6 +3,9 @@ package com.fixguild.account.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 /**
  * 新增租户结果。
  *
@@ -14,7 +17,10 @@ import lombok.Data;
  */
 @Data
 @Schema(description = "新增租户结果")
-public class PlatformTenantCreateVO {
+public class PlatformTenantCreateVO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /** 租户业务 ID。 */
     @Schema(description = "租户业务 ID")

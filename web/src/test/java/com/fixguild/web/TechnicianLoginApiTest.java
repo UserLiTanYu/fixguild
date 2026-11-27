@@ -1,5 +1,8 @@
 package com.fixguild.web;
 
+import com.fixguild.account.security.LoginAttemptGuard;
+import com.fixguild.common.enums.ClientCode;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -37,6 +40,17 @@ class TechnicianLoginApiTest {
     /** JSON 序列化工具。 */
     @Autowired
     private ObjectMapper objectMapper;
+
+    /** 登录失败锁定器，测试后清理，避免影响其他用例。 */
+    @Autowired
+    private LoginAttemptGuard loginAttemptGuard;
+
+    /** 清理测试产生的登录失败记录。 */
+    @AfterEach
+    void clearLoginFailures() {
+        loginAttemptGuard.clear(ClientCode.TECHNICIAN, "T0001", "technician");
+        loginAttemptGuard.clear(ClientCode.TECHNICIAN, "T0002", "technician");
+    }
 
     /** 技师登录后应能获取技师端权限和菜单。 */
     @Test

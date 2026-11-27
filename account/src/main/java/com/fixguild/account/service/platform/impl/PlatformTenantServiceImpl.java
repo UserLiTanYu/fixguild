@@ -19,6 +19,7 @@ import com.fixguild.account.vo.PlatformTenantVO;
 import com.fixguild.common.annotation.IgnoreTenant;
 import com.fixguild.common.domain.PageResult;
 import com.fixguild.common.enums.ClientCode;
+import com.fixguild.common.enums.EnableStatus;
 import com.fixguild.common.enums.ErrorCode;
 import com.fixguild.common.exception.BusinessException;
 import com.mybatisflex.core.paginate.Page;
@@ -43,6 +44,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class PlatformTenantServiceImpl implements PlatformTenantService {
+
+    /** 创建租户时的默认最大用户数。 */
+    private static final int DEFAULT_MAX_USER_COUNT = 50;
 
     /** 租户表 Mapper */
     private final SysTenantMapper sysTenantMapper;
@@ -91,10 +95,10 @@ public class PlatformTenantServiceImpl implements PlatformTenantService {
         entity.setId(null);
         entity.setUid(IdUtil.fastSimpleUUID());
         if (entity.getStatus() == null) {
-            entity.setStatus(1);
+            entity.setStatus(EnableStatus.ENABLED.getCode());
         }
         if (entity.getMaxUserCount() == null) {
-            entity.setMaxUserCount(50);
+            entity.setMaxUserCount(DEFAULT_MAX_USER_COUNT);
         }
 
         try {
@@ -200,7 +204,7 @@ public class PlatformTenantServiceImpl implements PlatformTenantService {
         admin.setUsername(param.getAdminUsername());
         admin.setPassword(AccountCredentialGenerator.hashPassword(initialPassword));
         admin.setNickname(StrUtil.blankToDefault(param.getAdminNickname(), "租户管理员"));
-        admin.setStatus(1);
+        admin.setStatus(EnableStatus.ENABLED.getCode());
         return admin;
     }
 

@@ -27,7 +27,9 @@ Java 21 · Spring Boot 4.0.5 · MyBatis-Flex 1.11.8 · springdoc 3.0.3 · Hutool
 
 ## 快速开始
 
-### 方式一：本地 H2（无需 Docker）
+### 方式一：本地 H2（显式指定 local）
+
+> 默认 profile 已改为 `dev`（MySQL）；只有明确要用 H2 时才需要加 `local`。
 
 ```powershell
 .\mvnw.cmd clean test
@@ -57,16 +59,25 @@ java -jar web/target/fixguild.jar --spring.profiles.active=local
   - 用户名：`sa`
   - 密码：空
 
-### 方式二：MySQL + Redis + MinIO（Docker）
+### 方式二：MySQL（默认）
+
+本机已安装 MySQL 时，先确认 `fixguild` 库、`lty/lty123456` 账号和表数据已初始化（首次执行 `docs/sql/schema.sql` 与 `docker/mysql/init/02-seed.sql`），再启动：
+
+```powershell
+.\mvnw.cmd -DskipTests package
+java -jar web/target/fixguild.jar
+```
+
+如果使用 Docker 提供 MySQL：
 
 ```powershell
 copy .env.example .env
-docker compose up -d
-.\mvnw.cmd -DskipTests package
-java -jar web/target/fixguild.jar --spring.profiles.active=dev
+docker compose up -d mysql
 ```
 
-`application.yml` 默认激活 `local` profile（H2）；连接 MySQL 时显式指定 `dev` profile。
+> 本机 MySQL 已占用 `3306` 时，Docker 的 `mysql` 服务会启动失败；此时只启动 `redis` / `minio`，或调整 `docker-compose.yml` 的端口映射。
+
+连接信息可通过 `DB_URL`、`DB_USERNAME`、`DB_PASSWORD` 覆盖。`application.yml` 默认激活 `dev` profile（MySQL）；使用 H2 时显式指定 `--spring.profiles.active=local`。
 
 默认端口：
 
@@ -78,8 +89,9 @@ java -jar web/target/fixguild.jar --spring.profiles.active=dev
 | MinIO API | `http://localhost:9000` |
 | MinIO 控制台 | `http://localhost:9001` |
 
-> MySQL 首次启动会自动执行 `docs/sql/schema.sql` 和 `docker/mysql/init/02-seed.sql`。  
-> 需要重置数据时执行 `docker compose down -v`。
+> Docker MySQL 首次创建数据卷时会自动执行 `docs/sql/schema.sql` 和 `docker/mysql/init/02-seed.sql`；本机 MySQL 需手动导入。
+>
+> 需要重置 Docker 数据时执行 `docker compose down -v`。
 
 ## M1 已实现
 
@@ -90,7 +102,7 @@ java -jar web/target/fixguild.jar --spring.profiles.active=dev
 - 全局异常处理 `GlobalExceptionHandler`
 - `TraceIdFilter`：每个请求生成 `traceId`，写入 MDC 和响应头 `X-Trace-Id`
 - MyBatis-Flex：分页、逻辑删除、审计字段、SQL 审计日志
-- 多租户骨架：`TenantContext` + `MyTenantFactory`（M2 接登录态）
+- 多租户骨架：`TenantContext` + `MyTenantFactory`（M2 已接入登录态）
 - `sys_tenant` 完整 CRUD：分页、新增、编辑、详情、启停
 - springdoc OpenAPI 文档 + `/doc.html` 兼容跳转
 - H2 本地 profile + MySQL dev profile

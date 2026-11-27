@@ -1,5 +1,8 @@
 package com.fixguild.web;
 
+import com.fixguild.account.security.LoginAttemptGuard;
+import com.fixguild.common.enums.ClientCode;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -37,6 +40,19 @@ class LoginApiTest {
     /** JSON 序列化工具。 */
     @Autowired
     private ObjectMapper objectMapper;
+
+    /** 登录失败锁定器，测试后清理，避免影响其他用例。 */
+    @Autowired
+    private LoginAttemptGuard loginAttemptGuard;
+
+    /** 清理测试产生的登录失败记录。 */
+    @AfterEach
+    void clearLoginFailures() {
+        loginAttemptGuard.clear(ClientCode.PLATFORM, "0", "admin");
+        loginAttemptGuard.clear(ClientCode.TENANT, "T0001", "lock_test");
+        loginAttemptGuard.clear(ClientCode.TENANT, "T0001", "tenant_admin");
+        loginAttemptGuard.clear(ClientCode.TENANT, "T9999", "tenant_admin");
+    }
 
     /** 平台端登录应返回 token 和用户信息。 */
     @Test

@@ -21,6 +21,9 @@ public final class AccountCredentialGenerator {
     /** 用户编码前缀。 */
     private static final String USER_CODE_PREFIX = "U";
 
+    /** 初始密码固定前缀。 */
+    private static final String INITIAL_PASSWORD_PREFIX = "Fg@";
+
     /** 初始密码随机部分长度。 */
     private static final int PASSWORD_RANDOM_LENGTH = 12;
 
@@ -45,7 +48,8 @@ public final class AccountCredentialGenerator {
      * @return 初始密码明文
      */
     public static String generateInitialPassword() {
-        return "Fg@" + RandomUtil.randomString(RandomUtil.BASE_CHAR_NUMBER, PASSWORD_RANDOM_LENGTH);
+        return INITIAL_PASSWORD_PREFIX
+                + RandomUtil.randomString(RandomUtil.BASE_CHAR_NUMBER, PASSWORD_RANDOM_LENGTH);
     }
 
     /**

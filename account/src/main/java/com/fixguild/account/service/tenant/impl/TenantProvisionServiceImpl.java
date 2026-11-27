@@ -11,12 +11,15 @@ import com.fixguild.account.mapper.SysMenuMapper;
 import com.fixguild.account.mapper.SysRoleMapper;
 import com.fixguild.account.mapper.SysRoleMenuMapper;
 import com.fixguild.account.mapper.SysUserRoleMapper;
+import com.fixguild.account.enums.DataScope;
 import com.fixguild.account.service.tenant.TenantProvisionService;
-import com.fixguild.account.support.RoleCodes;
+import com.fixguild.account.support.RoleConstants;
 import com.fixguild.common.annotation.IgnoreTenant;
 import com.fixguild.common.auth.LoginContext;
 import com.fixguild.common.enums.ClientCode;
+import com.fixguild.common.enums.EnableStatus;
 import com.fixguild.common.enums.ErrorCode;
+import com.fixguild.common.enums.YesNo;
 import com.fixguild.common.exception.BusinessException;
 import com.mybatisflex.core.query.QueryWrapper;
 import lombok.RequiredArgsConstructor;
@@ -54,10 +57,15 @@ public class TenantProvisionServiceImpl implements TenantProvisionService {
     /** 角色菜单 Mapper。 */
     private final SysRoleMenuMapper sysRoleMenuMapper;
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * <p>调用方是平台端租户开通流程；新租户数据还没有进入租户上下文，
+     * 因此这里显式使用 {@code @IgnoreTenant} 并手动设置新租户 tenant_id。</p>
+     */
     @Override
     @IgnoreTenant
-    @Transactional(propagation = Propagation.MANDATORY)
+    @Transactional(propagation = Propagation.MANDATORY, rollbackFor = Exception.class)
     public void provisionTenantAdmin(SysUserEntity admin) {
         String tenantId = admin.getTenantId();
         SysRoleEntity role = createTenantAdminRole(tenantId);
@@ -79,11 +87,11 @@ public class TenantProvisionServiceImpl implements TenantProvisionService {
         role.setUid(IdUtil.fastSimpleUUID());
         role.setTenantId(tenantId);
         role.setClientCode(ClientCode.TENANT.getCode());
-        role.setRoleCode(RoleCodes.TENANT_ADMIN);
+        role.setRoleCode(RoleConstants.TENANT_ADMIN);
         role.setRoleName("租户管理员");
-        role.setDataScope(2);
-        role.setStatus(1);
-        role.setIsSystem(1);
+        role.setDataScope(DataScope.TENANT.getCode());
+        role.setStatus(EnableStatus.ENABLED.getCode());
+        role.setIsSystem(YesNo.YES.getCode());
         role.setRemark("租户开通自动创建");
         sysRoleMapper.insert(role);
         return role;
@@ -98,7 +106,7 @@ public class TenantProvisionServiceImpl implements TenantProvisionService {
     private void bindTenantMenus(String tenantId, Long roleId) {
         QueryWrapper query = QueryWrapper.create()
                 .eq(SysMenuEntity::getClientCode, ClientCode.TENANT.getCode())
-                .eq(SysMenuEntity::getStatus, 1);
+                .eq(SysMenuEntity::getStatus, EnableStatus.ENABLED.getCode());
         query.orderBy(SysMenuEntity::getSort);
         List<SysMenuEntity> menus = sysMenuMapper.selectListByQuery(query);
         if (menus.isEmpty()) {

@@ -21,13 +21,14 @@ import com.fixguild.account.param.TenantUidParam;
 import com.fixguild.account.security.LoginAttemptGuard;
 import com.fixguild.account.service.tenant.TenantUserService;
 import com.fixguild.account.support.AccountCredentialGenerator;
-import com.fixguild.account.support.RoleCodes;
+import com.fixguild.account.support.RoleConstants;
 import com.fixguild.account.vo.TenantUserCreateVO;
 import com.fixguild.account.vo.TenantUserResetPasswordVO;
 import com.fixguild.account.vo.TenantUserVO;
 import com.fixguild.common.auth.LoginContext;
 import com.fixguild.common.domain.PageResult;
 import com.fixguild.common.enums.ClientCode;
+import com.fixguild.common.enums.EnableStatus;
 import com.fixguild.common.enums.ErrorCode;
 import com.fixguild.common.exception.BusinessException;
 import com.fixguild.common.tenant.TenantContext;
@@ -113,7 +114,7 @@ public class TenantUserServiceImpl implements TenantUserService {
         user.setPassword(AccountCredentialGenerator.hashPassword(initialPassword));
         user.setNickname(StrUtil.trim(param.getNickname()));
         user.setEmail(StrUtil.isBlank(param.getEmail()) ? null : StrUtil.trim(param.getEmail()));
-        user.setStatus(1);
+        user.setStatus(EnableStatus.ENABLED.getCode());
         try {
             sysUserMapper.insert(user);
         } catch (DuplicateKeyException e) {
@@ -192,7 +193,7 @@ public class TenantUserServiceImpl implements TenantUserService {
     public void changeStatus(TenantUserStatusParam param) {
         String tenantId = TenantContext.requireTenantId();
         SysUserEntity user = getByUid(param.getUid(), tenantId);
-        if (Integer.valueOf(0).equals(param.getStatus())
+        if (EnableStatus.DISABLED.getCode().equals(param.getStatus())
                 && user.getUserCode().equals(LoginContext.getUserCode())) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "不能停用当前登录账号");
         }
@@ -201,7 +202,7 @@ public class TenantUserServiceImpl implements TenantUserService {
         update.setId(user.getId());
         update.setStatus(param.getStatus());
         sysUserMapper.update(update, true);
-        if (Integer.valueOf(0).equals(param.getStatus())) {
+        if (EnableStatus.DISABLED.getCode().equals(param.getStatus())) {
             StpUtil.logout(user.getUserCode());
         } else {
             clearLoginFailures(tenantId, user.getUsername());
@@ -244,7 +245,7 @@ public class TenantUserServiceImpl implements TenantUserService {
      * @param user     待删除用户
      */
     private void checkNotLastTenantAdmin(String tenantId, SysUserEntity user) {
-        if (!Integer.valueOf(1).equals(user.getStatus())) {
+        if (!EnableStatus.ENABLED.getCode().equals(user.getStatus())) {
             return;
         }
         List<SysUserRoleEntity> userRoles = sysUserRoleMapper.selectListByQuery(QueryWrapper.create()
@@ -260,7 +261,7 @@ public class TenantUserServiceImpl implements TenantUserService {
         SysRoleEntity adminRole = sysRoleMapper.selectOneByQuery(QueryWrapper.create()
                 .eq(SysRoleEntity::getTenantId, tenantId)
                 .eq(SysRoleEntity::getClientCode, ClientCode.TENANT.getCode())
-                .eq(SysRoleEntity::getRoleCode, RoleCodes.TENANT_ADMIN)
+                .eq(SysRoleEntity::getRoleCode, RoleConstants.TENANT_ADMIN)
                 .in(SysRoleEntity::getId, roleIds));
         if (adminRole == null) {
             return;
@@ -278,7 +279,7 @@ public class TenantUserServiceImpl implements TenantUserService {
         }
         long activeOtherAdmins = sysUserMapper.selectCountByQuery(QueryWrapper.create()
                 .in(SysUserEntity::getId, otherUserIds)
-                .eq(SysUserEntity::getStatus, 1));
+                .eq(SysUserEntity::getStatus, EnableStatus.ENABLED.getCode()));
         if (activeOtherAdmins == 0) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "不能删除最后一个租户管理员");
         }
@@ -342,7 +343,7 @@ public class TenantUserServiceImpl implements TenantUserService {
         List<SysRoleEntity> roles = sysRoleMapper.selectListByQuery(QueryWrapper.create()
                 .eq(SysRoleEntity::getTenantId, tenantId)
                 .eq(SysRoleEntity::getClientCode, ClientCode.TENANT.getCode())
-                .eq(SysRoleEntity::getStatus, 1)
+                .eq(SysRoleEntity::getStatus, EnableStatus.ENABLED.getCode())
                 .in(SysRoleEntity::getUid, uids));
         if (roles.size() != uids.size()) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "包含无效角色");

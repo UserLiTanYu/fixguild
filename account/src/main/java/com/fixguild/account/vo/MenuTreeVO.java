@@ -3,20 +3,25 @@ package com.fixguild.account.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * 权限菜单树节点。
  *
- * <p>只包含目录和菜单（M/C），按钮（F）只进入权限串集合，不出现在菜单树中。</p>
+ * <p>按钮（F）是否出现由构建参数决定：权限接口排除按钮，角色分配菜单时包含按钮。</p>
  *
  * @author litanyu
  * @since 2026-11-24
  */
 @Data
 @Schema(description = "权限菜单树节点")
-public class MenuTreeVO {
+public class MenuTreeVO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /** 菜单业务 ID。 */
     @Schema(description = "菜单业务 ID")

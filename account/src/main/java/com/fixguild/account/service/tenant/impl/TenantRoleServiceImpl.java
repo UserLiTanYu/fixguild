@@ -15,13 +15,16 @@ import com.fixguild.account.param.TenantRoleCreateParam;
 import com.fixguild.account.param.TenantRoleMenusParam;
 import com.fixguild.account.param.TenantRolePageParam;
 import com.fixguild.account.param.TenantRoleUpdateParam;
+import com.fixguild.account.enums.DataScope;
 import com.fixguild.account.param.TenantUidParam;
 import com.fixguild.account.service.tenant.TenantRoleService;
 import com.fixguild.account.vo.TenantRoleVO;
 import com.fixguild.common.auth.LoginContext;
 import com.fixguild.common.domain.PageResult;
 import com.fixguild.common.enums.ClientCode;
+import com.fixguild.common.enums.EnableStatus;
 import com.fixguild.common.enums.ErrorCode;
+import com.fixguild.common.enums.YesNo;
 import com.fixguild.common.exception.BusinessException;
 import com.fixguild.common.tenant.TenantContext;
 import com.mybatisflex.core.paginate.Page;
@@ -48,9 +51,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class TenantRoleServiceImpl implements TenantRoleService {
-
-    /** M2 租户角色数据范围：本租户。 */
-    private static final int TENANT_DATA_SCOPE = 2;
 
     /** 角色表 Mapper。 */
     private final SysRoleMapper sysRoleMapper;
@@ -103,9 +103,11 @@ public class TenantRoleServiceImpl implements TenantRoleService {
         role.setClientCode(ClientCode.TENANT.getCode());
         role.setRoleCode(roleCode);
         role.setRoleName(StrUtil.trim(param.getRoleName()));
-        role.setDataScope(param.getDataScope() == null ? TENANT_DATA_SCOPE : param.getDataScope());
-        role.setStatus(param.getStatus() == null ? 1 : param.getStatus());
-        role.setIsSystem(0);
+        role.setDataScope(param.getDataScope() == null
+                ? DataScope.TENANT.getCode() : param.getDataScope());
+        role.setStatus(param.getStatus() == null
+                ? EnableStatus.ENABLED.getCode() : param.getStatus());
+        role.setIsSystem(YesNo.NO.getCode());
         role.setRemark(param.getRemark());
         try {
             sysRoleMapper.insert(role);
@@ -125,7 +127,7 @@ public class TenantRoleServiceImpl implements TenantRoleService {
     public void update(TenantRoleUpdateParam param) {
         String tenantId = TenantContext.requireTenantId();
         SysRoleEntity role = getByUid(param.getUid(), tenantId);
-        if (Integer.valueOf(1).equals(role.getIsSystem())) {
+        if (YesNo.YES.getCode().equals(role.getIsSystem())) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "系统内置角色不允许修改");
         }
         if (param.getRoleName() != null && StrUtil.isBlank(param.getRoleName())) {
@@ -155,7 +157,7 @@ public class TenantRoleServiceImpl implements TenantRoleService {
     public void bindMenus(TenantRoleMenusParam param) {
         String tenantId = TenantContext.requireTenantId();
         SysRoleEntity role = getByUid(param.getUid(), tenantId);
-        if (Integer.valueOf(1).equals(role.getIsSystem())) {
+        if (YesNo.YES.getCode().equals(role.getIsSystem())) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "系统内置角色不允许修改菜单");
         }
         if (param.getMenuUids() == null) {
@@ -176,7 +178,7 @@ public class TenantRoleServiceImpl implements TenantRoleService {
         List<SysMenuEntity> menus = sysMenuMapper.selectListByQuery(QueryWrapper.create()
                 .in(SysMenuEntity::getUid, menuUids)
                 .eq(SysMenuEntity::getClientCode, ClientCode.TENANT.getCode())
-                .eq(SysMenuEntity::getStatus, 1));
+                .eq(SysMenuEntity::getStatus, EnableStatus.ENABLED.getCode()));
         if (menus.size() != menuUids.size()) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "包含无效菜单");
         }
@@ -202,7 +204,7 @@ public class TenantRoleServiceImpl implements TenantRoleService {
     public void delete(TenantUidParam param) {
         String tenantId = TenantContext.requireTenantId();
         SysRoleEntity role = getByUid(param.getUid(), tenantId);
-        if (Integer.valueOf(1).equals(role.getIsSystem())) {
+        if (YesNo.YES.getCode().equals(role.getIsSystem())) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "系统内置角色不允许删除");
         }
         long assigned = sysUserRoleMapper.selectCountByQuery(QueryWrapper.create()
@@ -253,7 +255,7 @@ public class TenantRoleServiceImpl implements TenantRoleService {
      * @param dataScope 数据范围
      */
     private void checkDataScope(Integer dataScope) {
-        if (dataScope != null && dataScope != TENANT_DATA_SCOPE) {
+        if (dataScope != null && !DataScope.TENANT.getCode().equals(dataScope)) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "租户角色数据范围只能是 2（本租户）");
         }
     }

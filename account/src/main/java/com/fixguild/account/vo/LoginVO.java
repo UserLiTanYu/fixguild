@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 /**
  * 登录结果。
  *
@@ -15,7 +18,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "登录结果")
-public class LoginVO {
+public class LoginVO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /** token 名称。 */
     @Schema(description = "token 名称")

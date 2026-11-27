@@ -5,7 +5,6 @@ import com.fixguild.common.auth.LoginContext;
 import com.fixguild.common.domain.BaseEntity;
 import com.mybatisflex.annotation.InsertListener;
 import com.mybatisflex.annotation.UpdateListener;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -13,18 +12,17 @@ import java.time.LocalDateTime;
 /**
  * 审计字段填充：createBy/updateBy/createTime/updateTime/isDelete。
  *
- * <p>M1 还没有登录态，先用 system 兜底；M2 接入 Sa-Token 后从当前登录人取。
- * 插入时只补空值，更新时强制刷新 updateTime、updateBy 为空时兜底，create* 字段保持不变。
- * 全局注册见 MyBatisFlexConfig。</p>
+ * <p>createBy/updateBy 优先取当前登录用户（LoginContext），未登录场景兜底 system。
+ * 插入时只补空值，更新时强制刷新 updateTime、updateBy 为空时兜底，
+ * create* 字段保持不变。全局注册见 MyBatisFlexConfig。</p>
  *
  * @author litanyu
  * @since 2026-11-19
  */
-@Slf4j
 @Component
 public class AuditFieldListener implements InsertListener, UpdateListener {
 
-    /** M1 无登录态时的兜底操作人；M2 接入 Sa-Token 后移除 */
+    /** 未登录场景的兜底操作人。 */
     private static final String SYSTEM_USER = "system";
 
     /**
@@ -46,7 +44,7 @@ public class AuditFieldListener implements InsertListener, UpdateListener {
             if (base.getIsDelete() == null) {
                 base.setIsDelete(0);
             }
-            // 未登录时统一用 system 兜底，M2 改为当前登录人
+            // 未登录时统一用 system 兜底
             if (StrUtil.isBlank(base.getCreateBy())) {
                 base.setCreateBy(currentUser());
             }

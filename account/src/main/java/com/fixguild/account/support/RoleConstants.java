@@ -6,11 +6,11 @@ package com.fixguild.account.support;
  * @author litanyu
  * @since 2026-11-26
  */
-public final class RoleCodes {
+public final class RoleConstants {
 
     /** 租户管理员角色编码。 */
     public static final String TENANT_ADMIN = "tenant_admin";
 
-    private RoleCodes() {
+    private RoleConstants() {
     }
 }

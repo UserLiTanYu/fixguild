@@ -9,6 +9,8 @@ package com.fixguild.common.auth;
  * @param clientCode 登录端
  * @param username  登录名
  * @param nickname  昵称
+ * @author litanyu
+ * @since 2026-11-23
  */
 public record LoginUser(
         String userCode,

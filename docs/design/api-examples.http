@@ -69,6 +69,16 @@ POST {{baseUrl}}/account/api/technician/user/auth
 satoken: {{techToken}}
 client-code: technician
 
+### 平台端-当前用户
+POST {{baseUrl}}/account/api/platform/user/info
+satoken: {{platformToken}}
+client-code: platform
+
+### 平台端-权限菜单
+POST {{baseUrl}}/account/api/platform/user/auth
+satoken: {{platformToken}}
+client-code: platform
+
 ### 当前用户信息
 POST {{baseUrl}}/account/api/tenant/user/info
 satoken: {{tenantToken}}
@@ -88,6 +98,22 @@ client-code: tenant
 POST {{baseUrl}}/account/api/tenant/password/change
 satoken: {{tenantToken}}
 client-code: tenant
+Content-Type: application/json
+
+{
+  "oldPassword": "{{oldPassword}}",
+  "newPassword": "{{newPassword}}"
+}
+
+### 平台端-退出登录
+POST {{baseUrl}}/account/api/platform/logout
+satoken: {{platformToken}}
+client-code: platform
+
+### 平台端-修改密码（成功后当前 token 失效）
+POST {{baseUrl}}/account/api/platform/password/change
+satoken: {{platformToken}}
+client-code: platform
 Content-Type: application/json
 
 {
@@ -121,6 +147,19 @@ Content-Type: application/json
   "roleCode": "dispatcher",
   "roleName": "调度员",
   "dataScope": 2
+}
+
+### 租户端-编辑角色（uid 换成角色新增返回的值）
+POST {{baseUrl}}/tenant/api/role/update
+satoken: {{tenantToken}}
+client-code: tenant
+Content-Type: application/json
+
+{
+  "uid": "替换为角色 uid",
+  "roleName": "高级调度员",
+  "dataScope": 2,
+  "status": 1
 }
 
 ### 租户端-分配角色菜单（uid 换成角色新增返回的值）

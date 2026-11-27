@@ -10,10 +10,18 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * OpenAPI 文档信息与鉴权请求头。
+ *
+ * @author litanyu
+ * @since 2026-11-23
  */
 @Configuration
 public class OpenApiConfig {
 
+    /**
+     * 构建 Fixguild 的 OpenAPI 文档定义。
+     *
+     * @return OpenAPI 文档定义
+     */
     @Bean
     public OpenAPI fixguildOpenApi() {
         return new OpenAPI()

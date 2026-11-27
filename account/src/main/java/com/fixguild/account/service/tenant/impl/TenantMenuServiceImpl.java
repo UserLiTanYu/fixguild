@@ -5,6 +5,7 @@ import com.fixguild.account.mapper.SysMenuMapper;
 import com.fixguild.account.service.tenant.TenantMenuService;
 import com.fixguild.account.support.MenuTreeBuilder;
 import com.fixguild.account.vo.MenuTreeVO;
+import com.fixguild.common.enums.EnableStatus;
 import com.mybatisflex.core.query.QueryWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,7 @@ public class TenantMenuServiceImpl implements TenantMenuService {
     public List<MenuTreeVO> tree(String clientCode) {
         QueryWrapper query = QueryWrapper.create()
                 .eq(SysMenuEntity::getClientCode, clientCode)
-                .eq(SysMenuEntity::getStatus, 1);
+                .eq(SysMenuEntity::getStatus, EnableStatus.ENABLED.getCode());
         query.orderBy(SysMenuEntity::getSort);
         List<SysMenuEntity> menus = sysMenuMapper.selectListByQuery(query);
         return MenuTreeBuilder.build(menus, true);

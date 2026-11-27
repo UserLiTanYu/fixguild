@@ -18,6 +18,7 @@ import com.fixguild.account.vo.MenuTreeVO;
 import com.fixguild.account.vo.UserAuthVO;
 import com.fixguild.account.vo.UserInfoVO;
 import com.fixguild.common.auth.LoginUser;
+import com.fixguild.common.enums.EnableStatus;
 import com.fixguild.common.enums.ErrorCode;
 import com.fixguild.common.exception.BusinessException;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -121,7 +122,7 @@ public class AuthServiceImpl implements AuthService {
                 .eq(SysUserEntity::getUserCode, loginUser.userCode())
                 .eq(SysUserEntity::getTenantId, loginUser.tenantId())
                 .eq(SysUserEntity::getClientCode, loginUser.clientCode())
-                .eq(SysUserEntity::getStatus, 1));
+                .eq(SysUserEntity::getStatus, EnableStatus.ENABLED.getCode()));
     }
 
     /**
@@ -145,7 +146,7 @@ public class AuthServiceImpl implements AuthService {
         QueryWrapper roleQuery = QueryWrapper.create()
                 .eq(SysRoleEntity::getTenantId, user.getTenantId())
                 .eq(SysRoleEntity::getClientCode, user.getClientCode())
-                .eq(SysRoleEntity::getStatus, 1)
+                .eq(SysRoleEntity::getStatus, EnableStatus.ENABLED.getCode())
                 .in(SysRoleEntity::getId, roleIds);
         roleQuery.orderBy(SysRoleEntity::getId);
         List<SysRoleEntity> roles = sysRoleMapper.selectListByQuery(roleQuery);
@@ -180,7 +181,7 @@ public class AuthServiceImpl implements AuthService {
         QueryWrapper menuQuery = QueryWrapper.create()
                 .in(SysMenuEntity::getId, menuIds)
                 .eq(SysMenuEntity::getClientCode, user.getClientCode())
-                .eq(SysMenuEntity::getStatus, 1);
+                .eq(SysMenuEntity::getStatus, EnableStatus.ENABLED.getCode());
         menuQuery.orderBy(SysMenuEntity::getSort);
         List<SysMenuEntity> menus = sysMenuMapper.selectListByQuery(menuQuery);
 

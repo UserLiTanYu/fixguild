@@ -2,6 +2,9 @@ package com.fixguild.common.auth;
 
 /**
  * 登录与鉴权相关常量。
+ *
+ * @author litanyu
+ * @since 2026-11-23
  */
 public final class AuthConstants {
 
@@ -20,10 +23,19 @@ public final class AuthConstants {
      */
     public static final String PLATFORM_TENANT_ID = "0";
 
+    /** 登录会话中的租户编码 key。 */
     public static final String SESSION_TENANT_ID = "tenantId";
+
+    /** 登录会话中的登录端 key。 */
     public static final String SESSION_CLIENT_CODE = "clientCode";
+
+    /** 登录会话中的用户业务 ID key。 */
     public static final String SESSION_USER_UID = "userUid";
+
+    /** 登录会话中的登录名 key。 */
     public static final String SESSION_USERNAME = "username";
+
+    /** 登录会话中的昵称 key。 */
     public static final String SESSION_NICKNAME = "nickname";
 
     /**
@@ -36,8 +48,13 @@ public final class AuthConstants {
      */
     public static final long TOKEN_TIMEOUT_SECONDS = 30 * 24 * 60 * 60L;
 
+    /** MDC 中的租户编码 key。 */
     public static final String MDC_TENANT_ID = "tenantId";
+
+    /** MDC 中的用户编码 key。 */
     public static final String MDC_USER_CODE = "userCode";
+
+    /** MDC 中的登录端 key。 */
     public static final String MDC_CLIENT_CODE = "clientCode";
 
     private AuthConstants() {

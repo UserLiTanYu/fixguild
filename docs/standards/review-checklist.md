@@ -8,7 +8,7 @@
 - [ ] Controller 没有注入 Mapper，没有业务逻辑
 - [ ] Service 是接口 + 实现，事务加在实现类 public 方法
 - [ ] 没有 Entity 直接作为接口返回值
-- [ ] 构造器注入，无字段 `@Autowired`
+- [ ] 生产代码构造器注入，无字段 `@Autowired`
 - [ ] 无 `System.out`、`printStackTrace`、注释掉的代码
 - [ ] public 类有类级 Javadoc，复杂方法说明约束/副作用
 - [ ] 注释与代码一致，TODO 带里程碑，无裸 FIXME
@@ -18,7 +18,7 @@
 - [ ] 业务接口使用 `POST + JSON`（健康检查/下载/SSE 除外）
 - [ ] URL 符合 `/platform|tenant|technician/api/{资源}/{动作}`
 - [ ] 返回统一 `CommonResponse`，没有 `new CommonResponse`
-- [ ] 参数有 `@Valid` 和校验注解，错误消息为中文
+- [ ] 参数有 `@Valid` 和校验注解，错误消息为中文；路径变量使用 `@Validated` + 约束注解
 - [ ] Controller 有 `@Tag`，方法有 `@Operation`，字段有 `@Schema`
 - [ ] 业务失败抛 `BusinessException`，没有吞异常
 - [ ] 响应不包含堆栈、SQL、内部类名
@@ -62,7 +62,8 @@
 - [ ] 日志使用占位符，无字符串拼接
 - [ ] 日志无密码、token、完整手机号、身份证号
 - [ ] traceId 由 MDC 自动输出，没有手写
-- [ ] 权限注解已加（M2 起）
+- [ ] 权限注解已加（M2 起；当前用户接口按 13.2 例外）
+- [ ] 初始密码/登录 token 仅出现在本次响应，未写入日志、缓存或导出文件
 - [ ] 无硬编码密码/密钥/真实地址
 - [ ] 文件上传有类型和大小校验（M5 起）
 - [ ] 生产 Swagger 已关闭

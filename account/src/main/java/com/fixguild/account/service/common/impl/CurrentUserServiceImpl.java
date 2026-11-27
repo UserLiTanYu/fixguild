@@ -8,6 +8,7 @@ import com.fixguild.account.security.LoginAttemptGuard;
 import com.fixguild.account.service.common.CurrentUserService;
 import com.fixguild.common.auth.LoginUser;
 import com.fixguild.common.enums.ClientCode;
+import com.fixguild.common.enums.EnableStatus;
 import com.fixguild.common.enums.ErrorCode;
 import com.fixguild.common.exception.BusinessException;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -41,7 +42,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
                 .eq(SysUserEntity::getUserCode, loginUser.userCode())
                 .eq(SysUserEntity::getTenantId, loginUser.tenantId())
                 .eq(SysUserEntity::getClientCode, loginUser.clientCode())
-                .eq(SysUserEntity::getStatus, 1));
+                .eq(SysUserEntity::getStatus, EnableStatus.ENABLED.getCode()));
         if (user == null) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED, "用户不存在或已停用");
         }

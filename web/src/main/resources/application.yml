@@ -9,7 +9,7 @@ spring:
   application:
     name: fixguild
   profiles:
-    active: local
+    active: dev
   threads:
     virtual:
       enabled: true

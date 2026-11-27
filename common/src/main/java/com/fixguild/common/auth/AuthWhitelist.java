@@ -9,6 +9,9 @@ import java.util.List;
  * 鉴权白名单。
  *
  * <p>白名单集中维护，禁止在拦截器或 Controller 中散落判断。</p>
+ *
+ * @author litanyu
+ * @since 2026-11-23
  */
 @Component
 public class AuthWhitelist {
@@ -36,6 +39,12 @@ public class AuthWhitelist {
 
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
+    /**
+     * 判断请求路径是否命中白名单。
+     *
+     * @param uri 请求路径
+     * @return 命中返回 true
+     */
     public boolean matches(String uri) {
         return PATTERNS.stream().anyMatch(pattern -> pathMatcher.match(pattern, uri));
     }

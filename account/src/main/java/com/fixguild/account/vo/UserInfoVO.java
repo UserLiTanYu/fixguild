@@ -3,6 +3,9 @@ package com.fixguild.account.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 /**
  * 当前登录用户信息。
  *
@@ -11,7 +14,10 @@ import lombok.Data;
  */
 @Data
 @Schema(description = "当前登录用户信息")
-public class UserInfoVO {
+public class UserInfoVO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /** 用户业务 ID。 */
     @Schema(description = "用户业务 ID")

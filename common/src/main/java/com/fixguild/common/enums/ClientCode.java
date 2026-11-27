@@ -6,6 +6,9 @@ import lombok.Getter;
 
 /**
  * 登录端。
+ *
+ * @author litanyu
+ * @since 2026-11-23
  */
 @Getter
 @AllArgsConstructor

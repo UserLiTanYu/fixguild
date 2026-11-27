@@ -3,8 +3,8 @@
 | 项 | 内容 |
 |---|---|
 | 项目 | `fixguild`（匠盟 · 多租户维保工单 SaaS） |
-| 版本 | v0.3 |
-| 日期 | 2026-11-19 |
+| 版本 | v0.4 |
+| 日期 | 2026-11-27 |
 | 适用范围 | 所有模块（`common`、`account`、`core`、`web`）及后续新增模块 |
 | 配套文档 | [总体设计](../design/00-总体设计.md) · [数据库 DDL](../sql/schema.sql) · [接口示例](../design/api-examples.http) · [评审清单](review-checklist.md) |
 
@@ -193,6 +193,8 @@ com.fixguild.{module}
 ├── vo                # 出参
 ├── dto               # 跨模块/内部传输对象（可选）
 ├── enums             # 模块内枚举（可选）
+├── security          # 登录失败锁定、Sa-Token 权限提供者（account 模块）
+├── support           # 凭据生成、菜单树、角色常量等无状态支撑类
 └── config            # 模块内配置（可选）
 ```
 
@@ -200,15 +202,17 @@ com.fixguild.{module}
 
 ```text
 com.fixguild.common
-├── config            # MyBatis-Flex、OpenAPI 等全局配置
+├── config            # MyBatis-Flex、OpenAPI、Sa-Token 等全局配置
 ├── domain            # BaseEntity、TenantEntity、CommonResponse、PageParam、PageResult
-├── enums             # ErrorCode 等
+├── enums             # ErrorCode、EnableStatus、YesNo 等
 ├── exception         # BusinessException、GlobalExceptionHandler
 ├── filter            # TraceIdFilter
 ├── listener          # AuditFieldListener
 ├── tenant            # TenantContext、MyTenantFactory
-├── annotation        # 🟡 @IgnoreTenant、@Log、@DistributedLock
-├── aop               # 🟡 对应切面
+├── auth              # 登录上下文、鉴权常量与白名单
+├── interceptor       # Sa-Token 鉴权拦截器
+├── annotation        # @IgnoreTenant 等
+├── aspect            # @IgnoreTenant 等注解对应切面
 ├── mq                # 🟡 消息基类
 └── utils             # 🟡 加密、脱敏、Excel
 ```
@@ -292,7 +296,8 @@ com.fixguild.common
 规则：
 
 - 资源名**必须**用小写中划线：`work-order`、`export-task`。
-- 动作**必须**用动词：`page`、`create`、`update`、`detail`、`status`、`assign`、`accept`、`reject`、`start`、`complete`、`confirm`、`cancel`、`reopen`。
+- 写命令动作**必须**用动词：`create`、`update`、`status`、`assign`、`accept`、`reject`、`start`、`complete`、`confirm`、`cancel`、`reopen`。
+- 查询/视图类动作**允许**使用 `page`、`detail`、`tree`、`info`、`auth` 等名词；同一资源内应保持命名一致。
 - **禁止**在 URL 中使用自增 `id`；对外使用 `uid` / `orderNo`。
 - 路径版本化暂不做；如需不兼容升级，在资源名中加 `v2`（如 `/tenant/api/work-order-v2/page`）。
 
@@ -547,6 +552,7 @@ public class PlatformTenantCreateParam {
 - **必须**加 `@Schema`。
 - 时间字段**必须**加 `@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")`。
 - **禁止**返回密码、密文、哈希、内部状态字段。
+- 例外：创建/重置账号时的一次性初始密码**允许**在本次响应中明文返回；**必须**仅在本次响应出现，**禁止**写入日志、缓存、导出文件，前端**禁止**持久化，并应强制首次登录修改密码。
 - 手机号等敏感字段**必须**脱敏后再放入 VO（🟡 M5 统一注解）。
 - 一个 VO 可以同时服务列表和详情；当详情显著更重时，拆 `XxxDetailVO`。
 - VO **禁止**直接引用 Entity 类型。
@@ -651,7 +657,7 @@ sysTenantMapper.update(update, true);
 
 ### 6.3 依赖注入
 
-**必须**使用构造器注入：
+**必须**使用构造器注入（测试类可使用字段 `@Autowired`，见 16.2 示例）：
 
 ```java
 @Slf4j
@@ -665,7 +671,7 @@ public class PlatformTenantServiceImpl implements PlatformTenantService {
 
 **禁止**：
 
-- 字段注入 `@Autowired`；
+- 生产代码字段注入 `@Autowired`；
 - 注入 `ApplicationContext` 后用 `getBean` 取业务对象；
 - 在 Controller 中注入多个 Service 只为了拼装一个响应（应下沉到 Service）。
 
@@ -1361,7 +1367,7 @@ Key 格式：`{biz}:{type}:{tenantId}:{id}`
 | `dict:{dictType}` | 1 小时 | 字典变更删除 |
 | `tenant:info:{tenantId}` | 10 分钟 | 租户变更删除 |
 | `seq:workorder:{tenant}:{date}` | 2 天 | 自然过期 |
-| `login:fail:{client}:{username}` | 15 分钟 | 登录成功删除 |
+| `login:fail:{client}:{tenantId}:{username}` | 15 分钟 | 登录成功删除 |
 
 规则：
 
@@ -1412,7 +1418,8 @@ Key 格式：`{biz}:{type}:{tenantId}:{id}`
 
 ### 13.2 权限
 
-- 除白名单外，所有接口**必须**加 `@SaCheckPermission`（🟡 M2）。
+- 除白名单和当前用户接口外，所有接口**必须**加 `@SaCheckPermission`（🟡 M2）。
+- 当前用户接口（`/account/api/{client}/user/info`、`/user/auth`、`/logout`、`/password/change`）只要求登录，不要求业务权限标识；路径中的 `client` 必须与登录态一致。
 - 白名单**必须**集中配置，至少包括：登录、短信、健康检查、Swagger（仅本地/开发）。
 - **禁止**在 Controller 方法内手写"是否是管理员"的判断绕过权限框架。
 - 数据权限（本人/本租户/全部）**必须**在 Service 查询条件中体现，不能只靠前端隐藏按钮。
@@ -1432,6 +1439,8 @@ Key 格式：`{biz}:{type}:{tenantId}:{id}`
 - 完整手机号、身份证号、银行卡号；
 - 客户详细地址（按需脱敏）；
 - 数据库连接串、内部 IP。
+
+例外：登录响应返回的 token、创建/重置账号响应中的一次性初始密码属于业务必需；只允许在本次响应出现，**禁止**写入日志、MQ、导出文件，并**必须**满足 5.6 的限制。
 
 需要展示时**必须**脱敏，例如 `138****0000`。
 
@@ -1495,6 +1504,7 @@ Key 格式：`{biz}:{type}:{tenantId}:{id}`
 - 慢 SQL 阈值 **500ms**。
 - 当前 `MyBatisFlexConfig` 已按阈值输出：普通 SQL 为 `DEBUG`，耗时 ≥ 500ms 为 `WARN`；只输出 `AuditMessage.getQuery()`，不打印参数值。
 - 慢 SQL 日志**必须**包含：SQL、耗时、traceId、租户、用户。
+- `logback-spring.xml` 的日志 pattern **必须**输出 `traceId`、`tenantId`、`userCode`；SQL 审计日志依赖 MDC 中的租户和用户。
 - **禁止**在生产打印完整参数中的敏感字段。
 
 ---
@@ -1505,13 +1515,13 @@ Key 格式：`{biz}:{type}:{tenantId}:{id}`
 
 | Profile | 用途 | 数据库 | Swagger | H2 控制台 |
 |---|---|---|---|---|
-| `local` | 本地开发（默认） | H2 内存 | 开 | 开 |
-| `dev` | 本地/联调 MySQL | MySQL | 开 | 关 |
+| `local` | 本地开发（显式指定） | H2 内存 | 开 | 开 |
+| `dev` | 本地开发（默认）/联调 MySQL | MySQL | 开 | 关 |
 | `test` | CI / 集成测试 | H2 内存 | 开 | 关 |
 | `prod` | 生产 | MySQL（环境变量） | 关 | 关 |
 
-- `application.yml` 默认激活 `local`。
-- 使用 MySQL 时显式指定：`--spring.profiles.active=dev`。
+- `application.yml` 默认激活 `dev`（MySQL）。
+- 使用 H2 时显式指定：`--spring.profiles.active=local`。
 - **禁止**在 `prod` 中启用 H2 控制台或 Swagger。
 - 新增 Profile **必须**同步本文和 README。
 
@@ -1568,7 +1578,7 @@ XXL_JOB_ADMIN_ADDRESSES
 | 并发测试 | `web/src/test/java` 或独立脚本 | 并发接单、重复请求、工单号 |
 | 压测 | 独立工具（JMeter/Gatling） | 分页、创建、接单 p95 |
 
-- 当前只有 `web` 模块有集成测试（`SysTenantApiTest`），新增业务模块**必须**补对应测试。
+- 当前集成测试集中在 `web` 模块（如 `SysTenantApiTest`、`LoginApiTest`、`TenantUserApiTest` 等），新增业务模块**必须**补对应测试。
 - 集成测试**必须**使用 `@SpringBootTest` + `@AutoConfigureMockMvc` + `@ActiveProfiles("local")` 或 `test`。
 - 单元测试**禁止**连接真实 MySQL / Redis。
 
@@ -2165,14 +2175,15 @@ springdoc:
 
 ## 附录 B：现状例外清单
 
-> 以下问题在 M1 已存在。本文只约束**新增和改动**的代码；存量按"处理时机"逐步修正，不做全量重构。
+> 以下为当前保留的例外和 M1 存量问题。本文只约束**新增和改动**的代码；存量按"处理时机"逐步修正，不做全量重构。
 
 | # | 现状 | 规范要求 | 处理时机 |
 |---|---|---|---|
 | B.1 | 设计示例使用 ULID / 前缀 ID，代码使用 `IdUtil.fastSimpleUUID()` | `uid` 统一 32 位小写十六进制 UUID；业务编号单独生成 | 后续维护设计文档示例时统一 |
 | B.2 | `springdoc` 分组目前只有 `account` 和 `web` | 每个有 Controller 的模块必须有分组 | 新增 `core` Controller 时补 |
 | B.3 | `sys_tenant.contact_mobile` 仍是明文存储（VO 已脱敏） | 存储层 M5 改 SM4 密文，字段统一为 `_cipher` 命名 | M5 加密阶段 |
-| B.4 | `AuditFieldListener` 的 `create_by/update_by` 固定为 `system` | M2 从登录态取当前用户 | M2 接入 Sa-Token 后 |
+| B.4 | 创建/重置账号响应返回一次性明文初始密码 | 5.6/13.4 原禁止密码出现在响应 | 产品明确允许；仅本次响应、禁止日志/缓存/导出、强制首次改密 | 长期例外（每次评审确认） |
+| B.5 | 当前用户接口不配置 `@SaCheckPermission` | 13.2 要求除白名单外所有接口加权限标识 | 只要求登录，权限由登录态和路径登录端校验保证 | 长期例外 |
 
 **例外管理规则**：
 
@@ -2204,13 +2215,13 @@ springdoc:
 ### C.2 本地启动
 
 ```powershell
-# H2（默认 local）
+# MySQL（默认 dev）
+java -jar web/target/fixguild.jar
+
+# H2（显式 local）
 java -jar web/target/fixguild.jar --spring.profiles.active=local
 
-# MySQL（dev）
-java -jar web/target/fixguild.jar --spring.profiles.active=dev
-
-# IDE 直接运行 WebApplication，程序参数：
+# IDE 直接运行 WebApplication，默认走 dev；需要 H2 时程序参数加：
 --spring.profiles.active=local
 ```
 
@@ -2218,6 +2229,8 @@ java -jar web/target/fixguild.jar --spring.profiles.active=dev
 
 ```powershell
 .\mvnw.cmd install -DskipTests
+.\mvnw.cmd -pl web spring-boot:run
+# 需要 H2 时：
 .\mvnw.cmd -pl web spring-boot:run "-Dspring-boot.run.profiles=local"
 ```
 
@@ -2281,3 +2294,4 @@ docker compose down -v   # 连同数据卷一起删除，重置数据库
 | v0.1 | 2026-11-19 | 首版：基于 M1 代码和总体设计制定 |
 | v0.2 | 2026-11-19 | 同步租户 Param 拆分、异常映射、SQL 审计、依赖清理与手机号脱敏 |
 | v0.3 | 2026-11-19 | 完善注释规范与评审清单，补齐类级 Javadoc |
+| v0.4 | 2026-11-27 | 补充 M2 登录鉴权结构；明确登录 token/一次性初始密码例外、当前用户接口免权限例外、查询型 URL 动作和测试构造器注入范围 |

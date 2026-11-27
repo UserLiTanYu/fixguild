@@ -25,7 +25,8 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 当前登录用户接口。
  *
- * <p>路径中的 client 必须与 token 的登录端一致，避免登录端串用。</p>
+ * <p>路径中的 client 必须与 token 的登录端一致，避免登录端串用。
+ * 本控制器只要求登录，不要求业务权限标识（规范 13.2 例外）。</p>
  *
  * @author litanyu
  * @since 2026-11-24
@@ -33,7 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/account/api")
 @RequiredArgsConstructor
-@Tag(name = "账号权限-当前用户")
+@Tag(name = "公共-当前用户")
 public class CurrentUserController {
 
     /** 权限查询服务。 */

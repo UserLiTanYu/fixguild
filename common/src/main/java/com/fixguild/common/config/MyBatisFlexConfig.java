@@ -45,7 +45,6 @@ public class MyBatisFlexConfig implements MyBatisFlexCustomizer {
         });
     }
 
-
     /**
      * 注册数据库方言和实体监听器。
      *
@@ -53,7 +52,6 @@ public class MyBatisFlexConfig implements MyBatisFlexCustomizer {
      */
     @Override
     public void customize(FlexGlobalConfig globalConfig) {
-
         // H2 以 MySQL 模式运行，统一按 MySQL 方言生成 SQL
         globalConfig.setDbType(DbType.MYSQL);
         // 插入/更新时自动填充审计字段

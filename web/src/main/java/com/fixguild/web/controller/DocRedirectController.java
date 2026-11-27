@@ -1,5 +1,7 @@
 package com.fixguild.web.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
  * @since 2026-11-19
  */
 @Controller
+@Tag(name = "公共-接口文档")
 public class DocRedirectController {
 
     /**
@@ -18,6 +21,7 @@ public class DocRedirectController {
      * @return 重定向到 springdoc Swagger UI
      */
     @GetMapping("/doc.html")
+    @Operation(summary = "兼容旧版文档入口")
     public String doc() {
         return "redirect:/swagger-ui/index.html";
     }

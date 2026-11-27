@@ -1,11 +1,13 @@
 package com.fixguild.account.controller.tenant;
 
+import com.fixguild.account.dto.LoginClientInfo;
 import com.fixguild.account.param.TenantLoginParam;
 import com.fixguild.account.service.auth.LoginService;
 import com.fixguild.account.vo.LoginVO;
 import com.fixguild.common.domain.CommonResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/account/api")
 @RequiredArgsConstructor
-@Tag(name = "账号权限-租户登录")
+@Tag(name = "租户端-登录")
 public class TenantLoginController {
 
     /** 登录服务。 */
@@ -31,12 +33,14 @@ public class TenantLoginController {
     /**
      * 租户端登录。
      *
-     * @param param 请求参数
+     * @param param   请求参数
+     * @param request 当前 HTTP 请求，用于记录登录 IP 和 User-Agent
      * @return 统一响应
      */
     @PostMapping("/tenant/login")
     @Operation(summary = "租户端登录")
-    public CommonResponse<LoginVO> login(@Valid @RequestBody TenantLoginParam param) {
-        return CommonResponse.ok(loginService.loginTenant(param));
+    public CommonResponse<LoginVO> login(@Valid @RequestBody TenantLoginParam param,
+                                         HttpServletRequest request) {
+        return CommonResponse.ok(loginService.loginTenant(param, LoginClientInfo.from(request)));
     }
 }

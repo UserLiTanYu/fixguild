@@ -7,8 +7,8 @@ import com.fixguild.common.exception.BusinessException;
 /**
  * 当前线程的租户上下文。
  *
- * <p>HTTP 请求由拦截器写入（M2 接入登录态后）；MQ 消费、定时任务、异步线程必须显式 set/clear。
- * ThreadLocal 不跨线程传递，线程池复用前未清理会导致租户串数据。</p>
+ * <p>HTTP 请求由 SaTokenAuthInterceptor 写入；MQ 消费、定时任务、异步线程
+ * 必须显式 set/clear。ThreadLocal 不跨线程传递，线程池复用前未清理会导致租户串数据。</p>
  *
  * @author litanyu
  * @since 2026-11-19
@@ -77,7 +77,11 @@ public final class TenantContext {
         IGNORE.set(true);
     }
 
-
+    /**
+     * 恢复租户忽略标记。
+     *
+     * @param ignore 是否忽略租户隔离
+     */
     public static void setIgnore(boolean ignore) {
         IGNORE.set(ignore);
     }

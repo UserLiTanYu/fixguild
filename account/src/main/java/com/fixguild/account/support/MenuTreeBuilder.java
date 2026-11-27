@@ -1,6 +1,7 @@
 package com.fixguild.account.support;
 
 import com.fixguild.account.entity.SysMenuEntity;
+import com.fixguild.account.enums.MenuType;
 import com.fixguild.account.vo.MenuTreeVO;
 
 import java.util.ArrayList;
@@ -19,9 +20,6 @@ import java.util.Map;
  */
 public final class MenuTreeBuilder {
 
-    /** 按钮菜单类型。 */
-    private static final String MENU_TYPE_BUTTON = "F";
-
     private MenuTreeBuilder() {
     }
 
@@ -35,7 +33,7 @@ public final class MenuTreeBuilder {
     public static List<MenuTreeVO> build(List<SysMenuEntity> menus, boolean includeButtons) {
         Map<Long, MenuTreeVO> nodeById = new LinkedHashMap<>();
         for (SysMenuEntity menu : menus) {
-            if (!includeButtons && MENU_TYPE_BUTTON.equals(menu.getMenuType())) {
+            if (!includeButtons && MenuType.BUTTON.getCode().equals(menu.getMenuType())) {
                 continue;
             }
             MenuTreeVO node = new MenuTreeVO();

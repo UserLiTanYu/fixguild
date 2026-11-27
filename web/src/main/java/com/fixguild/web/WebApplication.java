@@ -9,7 +9,7 @@ import org.springframework.context.annotation.ComponentScan;
  * 应用启动入口。
  *
  * <p>统一扫描 com.fixguild；Mapper 分布在 account/core 两个模块。
- * 默认激活 local profile（H2），连接 MySQL 时显式指定 dev。</p>
+ * 默认激活 dev profile（MySQL），本地无 MySQL 时显式指定 local（H2）。</p>
  *
  * @author litanyu
  * @since 2026-11-19
